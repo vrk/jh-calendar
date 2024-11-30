@@ -1,0 +1,25 @@
+
+.container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.toolicons {
+  width: 50px;
+  background-color: #F9FFB3;
+  height: 100%;
+  cursor: pointer;
+}
+
+.toolbarMain {
+  background-color: gainsboro;
+  width: 300px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: -10;
+}

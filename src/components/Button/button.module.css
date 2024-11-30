@@ -1,0 +1,16 @@
+.button {
+  background-color: gainsboro;
+  padding: 10px;
+  border-radius: 5px;
+  padding: 3px;
+  border: 1px solid #cdc9ad;
+  color: black;
+  text-decoration: none;
+  font-family: var(--font-geist-mono);
+
+  font-size: 20px;
+}
+
+.button:hover {
+  background-color: #cdc9ad;
+}

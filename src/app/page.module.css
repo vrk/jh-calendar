@@ -1,0 +1,13 @@
+.page {
+  --gray-rgb: 0, 0, 0;
+
+  margin: 3em;
+}
+
+.main hr {
+  margin: 2em 0;
+}
+
+.main h1 {
+  margin: 1em 0;
+}

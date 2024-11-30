@@ -138,6 +138,9 @@ function createDates(startingX: number, startingY: number, skipFirstColumn: bool
 }
 
 function createDateSquare(startingX: number, startingY: number) {
+  const group = createSvgElement("g");
+  const squareFill = createDateHeaderFill(startingX, startingY);
+  group.append(squareFill);
   const square = createSvgElement("rect");
   square.setAttribute("width", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
   square.setAttribute("height", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
@@ -145,7 +148,8 @@ function createDateSquare(startingX: number, startingY: number) {
   square.setAttribute("y", `${startingY}`)
   square.setAttribute("stroke", "black");
   square.setAttribute("fill", "transparent");
-  return square;
+  group.append(square);
+  return group;
 }
 
 function createLine(x1: number, y1: number, x2: number, y2: number) {
@@ -159,15 +163,24 @@ function createLine(x1: number, y1: number, x2: number, y2: number) {
   return line;
 }
 
-
 function createHeaderFill(startingX: number, startingY: number, isDouble: boolean) {
+  return createHeaderFillInside(startingX, startingY, isDouble, true);
+}
+
+function createDateHeaderFill(startingX: number, startingY: number) {
+  return createHeaderFillInside(startingX, startingY, false, false);
+}
+
+function createHeaderFillInside(startingX: number, startingY: number, isDouble: boolean, hasBorder: boolean) {
   const square = createSvgElement("rect");
   const numberBoxesTall = isDouble ? 2 * NUMBER_BOXES_IN_HEADER : NUMBER_BOXES_IN_HEADER; 
   square.setAttribute("width", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
   square.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`);
   square.setAttribute("x", `${startingX}`)
   square.setAttribute("y", `${startingY}`)
-  square.setAttribute("stroke", "black");
+  if (hasBorder) {
+    square.setAttribute("stroke", "black");
+  }
   square.setAttribute("fill", isDouble ? "gray" : "white");
   return square;
 }

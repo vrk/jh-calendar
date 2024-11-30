@@ -7,12 +7,16 @@ import JournalPageNav from "@/components/JournalPageNav";
 import DragAndDropProvider from "@/components/DragAndDropProvider";
 import JournalToolbar from "@/components/JournalToolbar";
 import JournalSpreadView from "@/components/JournalSpreadView";
+import { PreviouslyLoadedCalendarKey } from "@/helpers/data-types";
 
 export default function JournalPage({
   params,
 }: {
   params: { journalId: string };
 }) {
+  // Save as the currently loaded calendar
+  window.localStorage.setItem(PreviouslyLoadedCalendarKey, params.journalId);
+  
   return (
     <div className={styles.page}>
       <main className={styles.main}>

@@ -60,3 +60,5 @@ export type PrintItem = {
   top: number;
   left: number;
 };
+
+export const PreviouslyLoadedCalendarKey = "__LAST_LOADED_CALENDAR_ID__";

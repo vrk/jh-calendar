@@ -11,7 +11,7 @@ import {
   PrintPage,
 } from "./data-types";
 
-const DATABASE_NAME = "OctoberJournalHelperDb";
+const DATABASE_NAME = "NovemberJournalHelperDb";
 
 const JOURNALS_STORE_NAME = "journals";
 

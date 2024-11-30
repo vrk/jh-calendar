@@ -6,6 +6,7 @@ const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
 const GRID_BOX_WIDTH_IN_PIXELS = PPI * GRID_BOX_WIDTH_IN_INCHES;
 
 const NUMBER_BOXES_IN_MARGIN = 2;
+const NUMBER_BOXES_IN_HEADER = 2;
 const NUMBER_BOXES_PER_PAGE_WIDTH = 40;
 const NUMBER_BOXES_PER_PAGE_HEIGHT = 57;
 
@@ -68,14 +69,14 @@ function createCousinSvg() {
   const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftPageGrid = createGridsForPage(leftStartingX, leftStartingY);
-  const leftPageBoxes = createDates(leftStartingX, leftStartingY + NUMBER_PIXELS_PER_MARGIN, true);
+  const leftPageBoxes = createDates(leftStartingX, leftStartingY, true);
 
   const rightStartingX =
     NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS +
     NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS;
   const rightStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const rightPageGrid = createGridsForPage(rightStartingX, rightStartingY);
-  const rightPageBoxes = createDates(rightStartingX, rightStartingY + NUMBER_PIXELS_PER_MARGIN, false);
+  const rightPageBoxes = createDates(rightStartingX, rightStartingY, false);
   svg.append(leftPageGrid);
   svg.append(leftPageBoxes);
   svg.append(rightPageGrid);
@@ -121,10 +122,17 @@ function createDates(startingX: number, startingY: number, skipFirstColumn: bool
       }
       
       const x = startingX + col * NUMBER_PIXELS_PER_DAY; 
-      const y = startingY + row * NUMBER_PIXELS_PER_DAY; 
+      const y = startingY + row * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN; 
       const dateSquare = createDateSquare(x, y);
       group.append(dateSquare);
     }
+  }
+  for (let col = 0; col < NUMBER_OF_COLUMNS; col++) {
+    const x = startingX + col * NUMBER_PIXELS_PER_DAY; 
+    const y = startingY;
+    const isDouble = skipFirstColumn && col === 0;
+    const square = createHeaderFill(x, y, isDouble);
+    group.append(square);
   }
   return group;
 }
@@ -149,4 +157,17 @@ function createLine(x1: number, y1: number, x2: number, y2: number) {
   line.setAttribute("stroke-dasharray", "2");
   line.setAttribute("stroke", "gainsboro");
   return line;
+}
+
+
+function createHeaderFill(startingX: number, startingY: number, isDouble: boolean) {
+  const square = createSvgElement("rect");
+  const numberBoxesTall = isDouble ? 2 * NUMBER_BOXES_IN_HEADER : NUMBER_BOXES_IN_HEADER; 
+  square.setAttribute("width", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute("x", `${startingX}`)
+  square.setAttribute("y", `${startingY}`)
+  square.setAttribute("stroke", "black");
+  square.setAttribute("fill", isDouble ? "gray" : "white");
+  return square;
 }

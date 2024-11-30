@@ -195,7 +195,7 @@ export async function getPhotoById(id: string): Promise<JournalImage> {
 
 export async function createJournal() {
   const journal = await createNewJournalRowInDb();
-  const spread = await createSpread(journal.id);
+  const spread = await createSpread(journal.id, getYearMonthForToday());
   return { journal, spread };
 }
 
@@ -256,7 +256,10 @@ async function getNumberOfPrintPagesForJournal(
 }
 
 // Adds new spread to the end of the journal
-export async function createSpread(journalId: string): Promise<Spread> {
+export async function createSpread(
+  journalId: string,
+  yearMonth: string
+): Promise<Spread> {
   return new Promise(async (resolve, reject) => {
     const db = await getDatabase();
     const transaction = db.transaction(SPREADS_STORE_NAME, "readwrite");
@@ -273,6 +276,7 @@ export async function createSpread(journalId: string): Promise<Spread> {
       id,
       journalId,
       order: numberSpreads, // always add to end for now
+      yearMonth,
     };
     const request = objectStore.add(spread);
     request.onerror = () => {
@@ -306,6 +310,29 @@ export async function createPrintPage(journalId: string): Promise<PrintPage> {
     const request = printPagesStore.add(spread);
     request.onerror = () => {
       reject(`Could not create object with id: ${id}`);
+    };
+    request.onsuccess = () => {
+      resolve(spread);
+    };
+  });
+}
+
+export async function updateSpreadDate(
+  spread: Spread,
+  yearMonth: string
+): Promise<Spread> {
+  return new Promise(async (resolve, reject) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(SPREADS_STORE_NAME, "readwrite");
+    const objectStore = transaction.objectStore(SPREADS_STORE_NAME);
+
+    const newSpreadData: Spread = {
+      ...spread,
+      yearMonth,
+    };
+    const request = objectStore.put(newSpreadData);
+    request.onerror = () => {
+      reject(`Could not update object with id: ${newSpreadData.id}`);
     };
     request.onsuccess = () => {
       resolve(spread);
@@ -797,4 +824,12 @@ export async function deletePrintPage(printPageId: string) {
       resolve(request.result);
     };
   });
+}
+
+export function getYearMonthForToday() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Adding 1 because getMonth() is 0-indexed
+  const yearMonth = `${year}-${month}`;
+  return yearMonth;
 }

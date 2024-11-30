@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { FabricImage, Canvas, util } from "fabric";
+import { FabricImage, Canvas, FabricObject, util, Group } from "fabric";
 import { FabricContext } from "../FabricContextProvider";
 import hobonichiCousinimage from "./images/hobonichi-cousin-spread.png";
 import {
@@ -24,7 +24,7 @@ import {
 } from "@/helpers/editable-object";
 import { JournalImage, SpreadItem } from "@/helpers/data-types";
 
-const DEFAULT_PPI = 300;
+const DEFAULT_PPI = 96;
 const DEFAULT_WIDTH_IN_INCHES = 5.8 * 2;
 const DEFAULT_HEIGHT_IN_INCHES = 8.3;
 const DEFAULT_DOC_WIDTH = DEFAULT_WIDTH_IN_INCHES * DEFAULT_PPI;
@@ -32,23 +32,22 @@ const DEFAULT_DOC_HEIGHT = DEFAULT_HEIGHT_IN_INCHES * DEFAULT_PPI;
 
 type Props = {
   currentSpreadId: string;
+  currentYearMonth: string;
   loadedImages: Array<JournalImage>;
   currentSpreadItems: Array<SpreadItem>;
 };
 
 function JournalCanvas({
   currentSpreadId,
+  currentYearMonth,
   loadedImages,
   currentSpreadItems,
 }: React.PropsWithoutRef<Props>) {
   const [fabricCanvas, initCanvas] = React.useContext(FabricContext);
   const overallContainer = React.useRef<HTMLDivElement>(null);
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
-  const [cousinHtmlImage, setCousinHtmlImage] =
-    React.useState<HTMLImageElement>();
   const [documentRectangle, setDocumentRectangle] =
-    React.useState<FabricImage>();
-  const [isCousinLoaded, setIsCousinLoaded] = React.useState(false);
+    React.useState<FabricObject>();
 
   useCanvasMousewheel(fabricCanvas, documentRectangle);
   useCenterOnResize(fabricCanvas, overallContainer, documentRectangle);
@@ -82,35 +81,28 @@ function JournalCanvas({
     };
   }, [overallContainer, htmlCanvas]);
 
-  // // Load Cousin Image
-  React.useEffect(() => {
-    loadCousinImage().then((cousinHtmlImage) => {
-      setCousinHtmlImage(cousinHtmlImage);
-    });
-  }, []);
-
   // Add Cousin Image to Fabric Canvas
   React.useEffect(() => {
-    if (fabricCanvas && cousinHtmlImage) {
-      const rectangle = createFabricImageForCousin(cousinHtmlImage);
+    if (fabricCanvas) {
+      // TODO FIX
+      const rectangle = createLeftPage();
       rectangle.backgroundId = BACKGROUND_ID_VALUE;
       fabricCanvas.add(rectangle);
       fabricCanvas.centerObject(rectangle);
       setDocumentRectangle(rectangle);
       zoomToFitDocument(fabricCanvas, rectangle);
       fabricCanvas.requestRenderAll();
-      setIsCousinLoaded(true);
     }
     return () => {
       if (documentRectangle) {
         fabricCanvas?.remove(documentRectangle);
       }
     };
-  }, [cousinHtmlImage, fabricCanvas]);
+  }, [fabricCanvas]);
 
   // Load Spread Items
   React.useEffect(() => {
-    if (!fabricCanvas || !isCousinLoaded) {
+    if (!fabricCanvas) {
       return;
     }
     const imagesCurrentlyUsedInSpread = loadedImages.filter(
@@ -125,7 +117,7 @@ function JournalCanvas({
       }
       addItemToCanvas(fabricCanvas, spreadItem, image);
     }
-  }, [fabricCanvas, isCousinLoaded]);
+  }, [fabricCanvas]);
 
   const onCanvasBlur = () => {
     if (!fabricCanvas) {
@@ -144,26 +136,21 @@ function JournalCanvas({
   );
 }
 
-function createFabricImageForCousin(backgroundImage: HTMLImageElement) {
-  return new FabricImage(backgroundImage, {
-    stroke: "#4B624C",
-    strokeWidth: 0,
-    selectable: false,
-    hasControls: false,
-    hoverCursor: "default",
-  });
+function createBackgroundForMonthYear() {    
+  var svgns = "http://www.w3.org/2000/svg";
+  var rect = document.createElementNS(svgns, 'rect');
+  rect.setAttribute('x', '150');
+  rect.setAttribute('y', '150');
+  rect.setAttribute('height', '50');
+  rect.setAttribute('width', '50');
+  rect.setAttribute('fill', '#'+Math.round(0xffffff *         Math.random()).toString(16));
+  return rect;
 }
 
-async function loadCousinImage(): Promise<HTMLImageElement> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.src = hobonichiCousinimage.src;
-    image.width = DEFAULT_DOC_WIDTH;
-    image.height = DEFAULT_DOC_HEIGHT;
-    image.addEventListener("load", () => {
-      resolve(image);
-    });
-  });
+
+function createLeftPage() {
+  const group = new Group();
+  return group;
 }
 
 export default JournalCanvas;

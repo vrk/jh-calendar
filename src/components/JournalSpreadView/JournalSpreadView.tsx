@@ -8,6 +8,7 @@ import JournalCanvas from "../JournalCanvas";
 
 function JournalSpreadView() {
   const {
+    allSpreads,
     currentSpreadId,
     journalLoadedStatus,
     currentSpreadItems,
@@ -16,9 +17,14 @@ function JournalSpreadView() {
   if (!currentSpreadId || journalLoadedStatus !== JournalLoadedStatus.Loaded) {
     return <></>;
   }
+  const currentSpread = allSpreads.find(s => s.id === currentSpreadId);
+  if (!currentSpread) {
+    return <></>
+  }
   return (
     <JournalCanvas
       key={currentSpreadId}
+      currentYearMonth={currentSpread.yearMonth}
       currentSpreadId={currentSpreadId}
       currentSpreadItems={currentSpreadItems}
       loadedImages={loadedImages}

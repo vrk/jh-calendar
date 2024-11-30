@@ -32,7 +32,7 @@ function useSaveSpreadSnapshot(
       const clonedCanvas = await fabricCanvas.clone(
         PROPERTIES_TO_INCLUDE_IN_CLONES
       );
-      console.log('CLONE');
+      console.log("CLONE");
       const [clonedBackground] = clonedCanvas
         .getObjects()
         .filter((o) => o.backgroundId === BACKGROUND_ID_VALUE);

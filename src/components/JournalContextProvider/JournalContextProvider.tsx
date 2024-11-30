@@ -31,6 +31,7 @@ type JournalContextType = {
 
   addSpread: () => Promise<void>;
   deleteSpread: (spreadId: string) => Promise<void>;
+  setCurrentSpreadDate: (yearMonth: string) => Promise<void>;
   addPrintPage: () => Promise<void>;
   deletePrintPage: (spreadId: string) => Promise<void>;
 
@@ -106,6 +107,9 @@ export const JournalContext = React.createContext<JournalContextType>({
     throw new Error("Function not implemented.");
   },
   deletePrintItems: function (idsToDelete: Array<string>): Promise<void> {
+    throw new Error("Function not implemented.");
+  },
+  setCurrentSpreadDate: function (yearMonth: string): Promise<void> {
     throw new Error("Function not implemented.");
   },
 });
@@ -226,11 +230,25 @@ const JournalContextProvider = ({
   };
 
   const addSpread = async () => {
-    const newSpread = await database.createSpread(journalId);
+    const newSpread = await database.createSpread(journalId, database.getYearMonthForToday());
 
     setCurrentSpreadIdState(newSpread.id);
     setCurrentSpreadItemsState([]);
     setAllSpreadsState([...allSpreads, newSpread]);
+  };
+
+  const setCurrentSpreadDate = async (yearMonth: string) => {
+    const currentSpread = allSpreads.find((s) => s.id === currentSpreadId);
+    if (!currentSpread) {
+      throw new Error(`Current spread not found when setting date`);
+    }
+    await database.updateSpreadDate(currentSpread, yearMonth);
+    const currentSpreadWithUpdatedDate = {
+      ...currentSpread, yearMonth
+    }
+
+    const allButCurrentSpread = allSpreads.filter((i) => i.id !== currentSpreadId);
+    setAllSpreadsState([ ...allButCurrentSpread, currentSpreadWithUpdatedDate ])
   };
 
   const addPrintPage = async () => {
@@ -263,7 +281,9 @@ const JournalContextProvider = ({
       setCurrentSpreadIdAndUpdateItems(firstSpread.id);
     }
 
-    const remainingSpreadItems = allSpreadItems.filter(i => i.spreadId !== idToDelete);
+    const remainingSpreadItems = allSpreadItems.filter(
+      (i) => i.spreadId !== idToDelete
+    );
     setAllSpreadItemsState([...remainingSpreadItems]);
   };
 
@@ -350,7 +370,7 @@ const JournalContextProvider = ({
 
     setCurrentSpreadItemsAndUpdateLoadedImages([...newCurrentSpreadItems]);
 
-    const allSpreadItemsWithoutDeleted =allSpreadItems.filter((current) => {
+    const allSpreadItemsWithoutDeleted = allSpreadItems.filter((current) => {
       if (deletedSpreadIds.includes(current.id)) {
         return false;
       }
@@ -435,6 +455,7 @@ const JournalContextProvider = ({
         addLoadedImages,
         deleteLoadedImage,
         addSpread,
+        setCurrentSpreadDate,
         deleteSpread,
         setCurrentSpreadId,
         addPrintPage,

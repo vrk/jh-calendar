@@ -27,6 +27,7 @@ export type Spread = {
   id: string;
   journalId: string;
   order: number;
+  yearMonth: string;
 
   previewThumbUrl?: string;
   previewThumbHeight?: number;

@@ -75,14 +75,25 @@ function createCousinSvg() {
 function createGridsForPage(startingX: number, startingY: number) {
   // <line x1="0" y1="3" x2="30" y2="3" stroke-dasharray="4" />
   const group = createSvgElement("g");
-  for (let i = 0; i < NUMBER_BOXES_PER_PAGE_HEIGHT - 2 * NUMBER_BOXES_IN_MARGIN; i++) {
+  for (let y = 0; y <= NUMBER_BOXES_PER_PAGE_HEIGHT - 2 * NUMBER_BOXES_IN_MARGIN; y++) {
     const x1 = startingX;
-    const y1 = startingY + i * GRID_BOX_WIDTH_IN_PIXELS;
+    const y1 = startingY + y * GRID_BOX_WIDTH_IN_PIXELS;
     const x2 =
       startingX +
       NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS -
       2 * NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
     const y2 = y1;
+    const line = createLine(x1, y1, x2, y2);
+    group.append(line);
+  }
+  for (let x = 0; x <= NUMBER_BOXES_PER_PAGE_WIDTH - 2 * NUMBER_BOXES_IN_MARGIN; x++) {
+    const x1 = startingX + x * GRID_BOX_WIDTH_IN_PIXELS;
+    const y1 = startingY;
+    const x2 = x1;
+    const y2 =
+      startingY +
+      NUMBER_BOXES_PER_PAGE_HEIGHT * GRID_BOX_WIDTH_IN_PIXELS -
+      2 * NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
     const line = createLine(x1, y1, x2, y2);
     group.append(line);
   }
@@ -95,8 +106,7 @@ function createLine(x1: number, y1: number, x2: number, y2: number) {
   line.setAttribute("y1", `${y1}`);
   line.setAttribute("x2", `${x2}`);
   line.setAttribute("y2", `${y2}`);
-  line.setAttribute("stroke-dasharray", "4");
-  line.setAttribute("stroke-dasharray", "4");
-  line.setAttribute("stroke", "black");
+  line.setAttribute("stroke-dasharray", "2");
+  line.setAttribute("stroke", "gainsboro");
   return line;
 }

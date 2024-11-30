@@ -9,6 +9,14 @@ const NUMBER_BOXES_IN_MARGIN = 2;
 const NUMBER_BOXES_PER_PAGE_WIDTH = 40;
 const NUMBER_BOXES_PER_PAGE_HEIGHT = 57;
 
+const NUMBER_BOXES_PER_DAY = 9;
+const NUMBER_OF_COLUMNS = 4;
+const NUMBER_OF_ROWS = 5;
+
+const NUMBER_PIXELS_PER_DAY = NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS;
+const NUMBER_PIXELS_PER_MARGIN = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+
+
 export default function HobonichiSvg() {
   const overallContainer = React.useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
@@ -60,14 +68,18 @@ function createCousinSvg() {
   const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftPageGrid = createGridsForPage(leftStartingX, leftStartingY);
+  const leftPageBoxes = createDates(leftStartingX, leftStartingY + NUMBER_PIXELS_PER_MARGIN, true);
 
   const rightStartingX =
     NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS +
     NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS;
   const rightStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const rightPageGrid = createGridsForPage(rightStartingX, rightStartingY);
+  const rightPageBoxes = createDates(rightStartingX, rightStartingY + NUMBER_PIXELS_PER_MARGIN, false);
   svg.append(leftPageGrid);
+  svg.append(leftPageBoxes);
   svg.append(rightPageGrid);
+  svg.append(rightPageBoxes);
 
   return svg;
 }
@@ -98,6 +110,34 @@ function createGridsForPage(startingX: number, startingY: number) {
     group.append(line);
   }
   return group;
+}
+
+function createDates(startingX: number, startingY: number, skipFirstColumn: boolean) {
+  const group = createSvgElement("g");
+  for (let row = 0; row < NUMBER_OF_ROWS; row++) {
+    for (let col = 0; col < NUMBER_OF_COLUMNS; col++) {
+      if (col === 0 && skipFirstColumn) {
+        continue;
+      }
+      
+      const x = startingX + col * NUMBER_PIXELS_PER_DAY; 
+      const y = startingY + row * NUMBER_PIXELS_PER_DAY; 
+      const dateSquare = createDateSquare(x, y);
+      group.append(dateSquare);
+    }
+  }
+  return group;
+}
+
+function createDateSquare(startingX: number, startingY: number) {
+  const square = createSvgElement("rect");
+  square.setAttribute("width", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute("height", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute("x", `${startingX}`)
+  square.setAttribute("y", `${startingY}`)
+  square.setAttribute("stroke", "black");
+  square.setAttribute("fill", "transparent");
+  return square;
 }
 
 function createLine(x1: number, y1: number, x2: number, y2: number) {

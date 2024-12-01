@@ -1,5 +1,5 @@
 export type YearMonthInfo = {
-  calMonth: number;
+  calMonth: number; // 0-index based
   calYear: number;
   firstDateOfMonth: Date;
 };

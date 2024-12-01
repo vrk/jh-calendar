@@ -38,6 +38,9 @@ const LOCAL_STORAGE_CALENDAR_KEY = "LastLoadedYearMonth";
 const ID_LENGTH = 10;
 
 export function loadYearMonthInfo(): YearMonthInfo | null {
+  if (!window) {
+    return null;
+  }
   const lastYearMonth = window.localStorage.getItem(LOCAL_STORAGE_CALENDAR_KEY);
   if (!lastYearMonth) {
     return null;

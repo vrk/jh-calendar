@@ -453,3 +453,7 @@ function getDateInfo(
     dayOfWeek,
   };
 }
+
+export function ClickableDate() {
+  return <rect x="10" y="10" height="100" width="100"></rect>;
+}

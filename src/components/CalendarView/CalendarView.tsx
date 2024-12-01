@@ -1,7 +1,7 @@
 import * as React from "react";
 import style from "./CalendarView.module.css";
 import { CalendarContext } from "../CalendarContextProvider/CalendarContextProvider";
-import { createCousinCalendarSvg } from "@/helpers/hobonichi-generator";
+import { createCousinCalendarSvg, ClickableDate } from "@/helpers/hobonichi-generator";
 import { getYearMonthString } from "@/helpers/calendar-helpers";
 
 const STATIC_CONTENT_ID = "static-conten";
@@ -29,7 +29,7 @@ function CalendarView() {
     <div className={style.container}>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
-          <rect x="0" y="0" height="100" width="100"></rect>
+          <ClickableDate></ClickableDate>
         </svg>
       </div>;
     </div>

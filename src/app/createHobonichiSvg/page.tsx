@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { add } from 'date-fns'
+import { add } from "date-fns";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -70,14 +70,24 @@ function createCousinSvg(yearMonth: string) {
   const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftPageGrid = createGridsForPage(leftStartingX, leftStartingY);
-  const leftPageBoxes = createDates(leftStartingX, leftStartingY, true, yearMonth);
+  const leftPageBoxes = createDates(
+    leftStartingX,
+    leftStartingY,
+    true,
+    yearMonth
+  );
 
   const rightStartingX =
     NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS +
     NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS;
   const rightStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const rightPageGrid = createGridsForPage(rightStartingX, rightStartingY);
-  const rightPageBoxes = createDates(rightStartingX, rightStartingY, false, yearMonth);
+  const rightPageBoxes = createDates(
+    rightStartingX,
+    rightStartingY,
+    false,
+    yearMonth
+  );
   svg.append(leftPageGrid);
   svg.append(leftPageBoxes);
   svg.append(rightPageGrid);
@@ -166,7 +176,11 @@ function createDates(
   return group;
 }
 
-function createDateSquare(startingX: number, startingY: number, dateInfo: { dayNumber: string, isInMonth: boolean }) {
+function createDateSquare(
+  startingX: number,
+  startingY: number,
+  dateInfo: DateInfo
+) {
   const group = createSvgElement("g");
   const squareFill = createDaySubheadFill(startingX, startingY, dateInfo);
   group.append(squareFill);
@@ -200,9 +214,19 @@ function createLine(x1: number, y1: number, x2: number, y2: number) {
   return line;
 }
 
-function createDayHeader(startingX: number, startingY: number, message: string) {
+function createDayHeader(
+  startingX: number,
+  startingY: number,
+  message: string
+) {
   const fillGroup = createHeaderFill(startingX, startingY, false);
-  const text = createText(message, startingX, startingY, 2, Position.MiddleRight);
+  const text = createText(
+    message,
+    startingX,
+    startingY,
+    2,
+    Position.MiddleRight
+  );
   fillGroup.append(text);
   return fillGroup;
 }
@@ -215,9 +239,17 @@ function createHeaderFill(
   return createFillSvg(startingX, startingY, isDouble, true);
 }
 
-function createDaySubheadFill(startingX: number, startingY: number,  dateInfo: { dayNumber: string, isInMonth: boolean }) {
-  const fillGroup = createFillSvg(startingX, startingY, false, false);
-  const text = createText(dateInfo.dayNumber, startingX, startingY, 2, Position.Left);
+function createDaySubheadFill(
+  startingX: number,
+  startingY: number,
+  dateInfo: DateInfo
+) {
+  const fillGroup = createFillSvg(startingX, startingY, false, false, dateInfo);
+  const text = createDateText(
+    dateInfo,
+    startingX,
+    startingY,
+  );
   fillGroup.append(text);
   return fillGroup;
 }
@@ -226,7 +258,8 @@ function createFillSvg(
   startingX: number,
   startingY: number,
   isDouble: boolean,
-  hasBorder: boolean
+  hasBorder: boolean,
+  dateInfo?: DateInfo
 ) {
   const group = createSvgElement("g");
   const square = createSvgElement("rect");
@@ -248,19 +281,6 @@ function createFillSvg(
   }
   square.setAttribute("shape-rendering", "crispEdges");
   square.setAttribute("fill", isDouble ? "gray" : "white");
-  //   <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">TEXT</text>
-  // const text = createSvgElement("text");
-  // const offset = GRID_BOX_WIDTH_IN_PIXELS;
-  // text.setAttribute("x", `${startingX + offset}`);
-  // text.setAttribute(
-  //   "y",
-  //   `${startingY + (numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS) / 2 + 1}`
-  // );
-  // text.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`);
-  // text.setAttribute("dominant-baseline", "middle");
-  // text.setAttribute("text-anchor", "middle");
-  // text.setAttribute("style", "color: black");
-  // text.innerHTML = "25";
   group.append(square);
   // group.append(text);
   return group;
@@ -291,13 +311,45 @@ function createText(
   text.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`);
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("text-anchor", "middle");
-  text.setAttribute("style", "color: black");
+  text.setAttribute("fill", "black");
   text.innerHTML = message;
   return text;
 }
 
-function getDateInfo(row: number, col: number, skipFirstColumn: boolean, yearMonth: string) {
-  const [ year, month ] = yearMonth.split('-'); 
+function createDateText(
+  dateInfo: DateInfo,
+  startingX: number,
+  startingY: number
+) {
+  const text = createText(
+    `${dateInfo.dateNumber}`,
+    startingX,
+    startingY,
+    2,
+    Position.Left
+  );
+  if (!dateInfo.isInMonth) {
+    text.setAttribute("opacity", "50%");
+  }
+  if (dateInfo.dayOfWeek === 0) {
+    text.setAttribute("fill", "red");
+  }
+  return text;
+}
+
+type DateInfo = {
+  dateNumber: number;
+  dayOfWeek: number;
+  isInMonth: boolean;
+};
+
+function getDateInfo(
+  row: number,
+  col: number,
+  skipFirstColumn: boolean,
+  yearMonth: string
+): DateInfo {
+  const [year, month] = yearMonth.split("-");
   const yearAsNum = parseInt(year);
   const monthAsNum = parseInt(month) - 1;
   const firstDateOfMonth = new Date(yearAsNum, monthAsNum, 1);
@@ -313,10 +365,11 @@ function getDateInfo(row: number, col: number, skipFirstColumn: boolean, yearMon
   }
   let offsetFromFirstDay = row * 7 - dayOfFirst + col + colOffset;
   const todaysDate = add(firstDateOfMonth, {
-    days: offsetFromFirstDay
-  })
-  const dayNumber = `${todaysDate.getDate()}`;
+    days: offsetFromFirstDay,
+  });
+  const dateNumber = todaysDate.getDate();
   const isInMonth = todaysDate.getMonth() === monthAsNum;
+  const dayOfWeek = todaysDate.getDay();
 
-  return { dayNumber, isInMonth };
+  return { dateNumber, isInMonth, dayOfWeek };
 }

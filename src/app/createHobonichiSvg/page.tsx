@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { add } from 'date-fns'
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -26,7 +27,7 @@ export default function HobonichiSvg() {
     if (!overallContainer.current || isLoaded) {
       return;
     }
-    const box = createCousinSvg();
+    const box = createCousinSvg("2024-11");
     overallContainer.current.append(box);
     setIsLoaded(true);
     return () => {
@@ -49,7 +50,7 @@ function createSvgElement(name: string) {
   return document.createElementNS("http://www.w3.org/2000/svg", name);
 }
 
-function createCousinSvg() {
+function createCousinSvg(yearMonth: string) {
   const svg = createSvgElement("svg");
   svg.setAttribute("style", "border: 1px solid black");
   svg.setAttribute(
@@ -69,14 +70,14 @@ function createCousinSvg() {
   const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftPageGrid = createGridsForPage(leftStartingX, leftStartingY);
-  const leftPageBoxes = createDates(leftStartingX, leftStartingY, true);
+  const leftPageBoxes = createDates(leftStartingX, leftStartingY, true, yearMonth);
 
   const rightStartingX =
     NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS +
     NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS;
   const rightStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const rightPageGrid = createGridsForPage(rightStartingX, rightStartingY);
-  const rightPageBoxes = createDates(rightStartingX, rightStartingY, false);
+  const rightPageBoxes = createDates(rightStartingX, rightStartingY, false, yearMonth);
   svg.append(leftPageGrid);
   svg.append(leftPageBoxes);
   svg.append(rightPageGrid);
@@ -135,12 +136,12 @@ function createDates(
       if (col === 0 && skipFirstColumn) {
         continue;
       }
-      const { dayNumber, isInMonth } = getDateInfo(row, col, skipFirstColumn, yearMonth);
+      const dateInfo = getDateInfo(row, col, skipFirstColumn, yearMonth);
 
       const x = startingX + col * NUMBER_PIXELS_PER_DAY;
       const y =
         startingY + row * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN;
-      const dateSquare = createDateSquare(x, y);
+      const dateSquare = createDateSquare(x, y, dateInfo);
       group.append(dateSquare);
     }
   }
@@ -165,9 +166,9 @@ function createDates(
   return group;
 }
 
-function createDateSquare(startingX: number, startingY: number) {
+function createDateSquare(startingX: number, startingY: number, dateInfo: { dayNumber: string, isInMonth: boolean }) {
   const group = createSvgElement("g");
-  const squareFill = createDaySubheadFill(startingX, startingY);
+  const squareFill = createDaySubheadFill(startingX, startingY, dateInfo);
   group.append(squareFill);
   const square = createSvgElement("rect");
   square.setAttribute(
@@ -214,8 +215,11 @@ function createHeaderFill(
   return createFillSvg(startingX, startingY, isDouble, true);
 }
 
-function createDaySubheadFill(startingX: number, startingY: number) {
-  return createFillSvg(startingX, startingY, false, false);
+function createDaySubheadFill(startingX: number, startingY: number,  dateInfo: { dayNumber: string, isInMonth: boolean }) {
+  const fillGroup = createFillSvg(startingX, startingY, false, false);
+  const text = createText(dateInfo.dayNumber, startingX, startingY, 2, Position.Left);
+  fillGroup.append(text);
+  return fillGroup;
 }
 
 function createFillSvg(
@@ -293,15 +297,26 @@ function createText(
 }
 
 function getDateInfo(row: number, col: number, skipFirstColumn: boolean, yearMonth: string) {
-  let dayNumber = "25";
-  let isInMonth = false;
+  const [ year, month ] = yearMonth.split('-'); 
+  const yearAsNum = parseInt(year);
+  const monthAsNum = parseInt(month) - 1;
+  const firstDateOfMonth = new Date(yearAsNum, monthAsNum, 1);
+  const dayOfFirst = firstDateOfMonth.getDay();
+  // dayOfFirst = 3;
 
-  if (skipFirstColumn) {
-    
-  } else {
-
+  if (skipFirstColumn && col === 0) {
+    throw new Error("shouldn't have date info");
   }
-
+  let colOffset = 0;
+  if (!skipFirstColumn) {
+    colOffset = 4;
+  }
+  let offsetFromFirstDay = row * 7 - dayOfFirst + col + colOffset;
+  const todaysDate = add(firstDateOfMonth, {
+    days: offsetFromFirstDay
+  })
+  const dayNumber = `${todaysDate.getDate()}`;
+  const isInMonth = todaysDate.getMonth() === monthAsNum;
 
   return { dayNumber, isInMonth };
 }

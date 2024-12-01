@@ -29,7 +29,7 @@ function CalendarView() {
     <div className={style.container}>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
-          <ClickableDate></ClickableDate>
+          <ClickableDate dayInMonth={1} yearMonthInfo={yearMonthInfo}></ClickableDate>
         </svg>
       </div>;
     </div>

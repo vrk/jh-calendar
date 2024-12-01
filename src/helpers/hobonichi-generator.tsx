@@ -454,6 +454,18 @@ function getDateInfo(
   };
 }
 
-export function ClickableDate() {
-  return <rect x="10" y="10" height="100" width="100"></rect>;
+type ClickableDateProps = {
+  dayInMonth: number;
+  yearMonthInfo: YearMonthInfo;
+}
+export function ClickableDate({ dayInMonth, yearMonthInfo}: ClickableDateProps ) {
+  let dayOfFirst = yearMonthInfo.firstDateOfMonth.getDay();
+  if (dayOfFirst === 0) {
+    dayOfFirst = 7;
+  }
+  const x = 10;
+  const y = 10;
+
+
+  return <rect x={x} y={y} height="100" width="100"></rect>;
 }

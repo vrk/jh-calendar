@@ -1,10 +1,8 @@
 "use client";
 import {
   ClipPathInfo,
-  DayToImageMap,
   FullCroppedPhotoInfo,
   FullImage,
-  IdToFullImageMap,
   ResizedImage,
   ValidDate,
   YearMonthInfo,
@@ -22,7 +20,7 @@ type CalendarFunctions = {
     clipPathInfo: ClipPathInfo,
     fullCroppedImageData: ImageData
   ) => void;
-  getCroppedPhotoInfoForDate: (date: ValidDate) => FullCroppedPhotoInfo|null;
+  getCroppedPhotoInfoForDate: (date: ValidDate) => FullCroppedPhotoInfo | null;
   removePhotoForDate: (date: ValidDate) => void;
 
   setYearMonth: (yearMonth: string) => void;
@@ -31,9 +29,10 @@ type CalendarFunctions = {
 };
 
 type CalendarContextProvider = {
+  loadedStatus: LoadedStatus;
   yearMonthInfo: YearMonthInfo;
-  thumbnailsOfFullImages: IdToFullImageMap;
-  croppedDateImages: DayToImageMap;
+  thumbnailsOfFullImages: Map<string, ImageData>;
+  croppedDateImages: Map<ValidDate, ResizedImage>;
 
   calendarFunctions: CalendarFunctions;
 };
@@ -45,8 +44,9 @@ export enum LoadedStatus {
 }
 
 export const CalendarContext = React.createContext<CalendarContextProvider>({
+  loadedStatus: LoadedStatus.Uninitialized,
   yearMonthInfo: getTodaysYearMonthInfo(),
-  thumbnailsOfFullImages: new Map<string, FullImage>(),
+  thumbnailsOfFullImages: new Map<string, ImageData>(),
   croppedDateImages: new Map<ValidDate, ResizedImage>(),
   calendarFunctions: {
     addFullImage: function (data: string): void {
@@ -55,10 +55,17 @@ export const CalendarContext = React.createContext<CalendarContextProvider>({
     removeFullImage: function (id: string): void {
       throw new Error("Function not implemented.");
     },
-    setPhotoForDate: function (date: ValidDate, fullImageId: string, clipPathInfo: ClipPathInfo, fullCroppedImageData: ImageData): void {
+    setPhotoForDate: function (
+      date: ValidDate,
+      fullImageId: string,
+      clipPathInfo: ClipPathInfo,
+      fullCroppedImageData: ImageData
+    ): void {
       throw new Error("Function not implemented.");
     },
-    getCroppedPhotoInfoForDate: function (date: ValidDate): FullCroppedPhotoInfo | null {
+    getCroppedPhotoInfoForDate: function (
+      date: ValidDate
+    ): FullCroppedPhotoInfo | null {
       throw new Error("Function not implemented.");
     },
     removePhotoForDate: function (date: ValidDate): void {
@@ -69,13 +76,76 @@ export const CalendarContext = React.createContext<CalendarContextProvider>({
     },
     clearCalendar: function (): void {
       throw new Error("Function not implemented.");
-    }
-  }
+    },
+  },
 });
 
 const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
+  const [loadedStatus, setLoadedStatus] = React.useState(
+    LoadedStatus.Uninitialized
+  );
+  const [yearMonthInfo, setYearMonthInfo] = React.useState(
+    getTodaysYearMonthInfo()
+  );
+  const [thumbnailsOfFullImages, setThumbnailsOfFullImages] = React.useState(
+    new Map<string, ImageData>()
+  );
+
+  const [croppedDateImages, setCroppedDateImages] = React.useState(
+    new Map<ValidDate, ResizedImage>()
+  );
+
+  const calendarFunctions: CalendarFunctions = {
+    addFullImage: function (data: string): void {
+      throw new Error("Function not implemented.");
+    },
+    removeFullImage: function (id: string): void {
+      throw new Error("Function not implemented.");
+    },
+    setPhotoForDate: function (
+      date: ValidDate,
+      fullImageId: string,
+      clipPathInfo: ClipPathInfo,
+      fullCroppedImageData: ImageData
+    ): void {
+      throw new Error("Function not implemented.");
+    },
+    getCroppedPhotoInfoForDate: function (
+      date: ValidDate
+    ): FullCroppedPhotoInfo | null {
+      throw new Error("Function not implemented.");
+    },
+    removePhotoForDate: function (date: ValidDate): void {
+      throw new Error("Function not implemented.");
+    },
+    setYearMonth: function (yearMonth: string): void {
+      throw new Error("Function not implemented.");
+    },
+    clearCalendar: function (): void {
+      throw new Error("Function not implemented.");
+    },
+  };
+
+  const initializeContext = async () => {};
+
+  React.useEffect(() => {
+    setLoadedStatus(LoadedStatus.Loading);
+    initializeContext().then(() => {
+      setLoadedStatus(LoadedStatus.Loaded);
+    });
+  }, []);
   return (
-    <CalendarContext.Provider value={{}}>{children}</CalendarContext.Provider>
+    <CalendarContext.Provider
+      value={{
+        loadedStatus,
+        yearMonthInfo,
+        thumbnailsOfFullImages,
+        croppedDateImages,
+        calendarFunctions,
+      }}
+    >
+      {children}
+    </CalendarContext.Provider>
   );
 };
 

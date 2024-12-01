@@ -32,9 +32,6 @@ export type ClipPathInfo = {
   width: number;
 }
 
-export type IdToFullImageMap = Map<string, FullImage>;
-export type DayToImageMap = Map<ValidDate, ResizedImage>;
-
 export type ValidDate =
   | 1
   | 2

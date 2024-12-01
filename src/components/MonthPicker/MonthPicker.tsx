@@ -1,21 +1,18 @@
 import * as React from 'react';
 import style from './MonthPicker.module.css';
-import { JournalContext } from '../JournalContextProvider/JournalContextProvider';
+import { CalendarContext } from '../CalendarContextProvider/CalendarContextProvider';
+import { getYearMonthString } from '@/helpers/calendar-helpers';
 
 function MonthPicker() {
-  const { currentSpreadId, allSpreads, setCurrentSpreadDate } = React.useContext(JournalContext);
+  const { yearMonthInfo, calendarFunctions } = React.useContext(CalendarContext);
   const [ currentSpreadMonthDate, setCurrentSpreadMonthDate ] = React.useState("");
   React.useEffect(() => {
-    const currentSpread = allSpreads.find((s) => s.id === currentSpreadId);
-    if (!currentSpread) {
-      throw new Error("Current Spread not loaded");
-    }
-    setCurrentSpreadMonthDate(currentSpread.yearMonth);
-  }, [currentSpreadId, allSpreads]);
+    setCurrentSpreadMonthDate(getYearMonthString(yearMonthInfo));
+  }, [yearMonthInfo]);
 
   return <div className={style.container}>
     <input type="month" value={currentSpreadMonthDate} onChange={(event) => {
-      setCurrentSpreadDate(event.target.value);
+      calendarFunctions.setYearMonth(event.target.value);
     }}/>
   </div>;
 }

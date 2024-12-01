@@ -95,6 +95,9 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     new Map<ValidDate, ResizedImage>()
   );
 
+  console.log('creating new map');
+  const loadedImagesCache = new Map<string, ImageData>();
+
   const calendarFunctions: CalendarFunctions = {
     addFullImage: function (data: string): void {
       throw new Error("Function not implemented.");
@@ -126,7 +129,9 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     },
   };
 
-  const initializeContext = async () => {};
+  const initializeContext = async () => {
+
+  };
 
   React.useEffect(() => {
     setLoadedStatus(LoadedStatus.Loading);

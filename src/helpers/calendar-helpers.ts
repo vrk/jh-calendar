@@ -8,6 +8,10 @@ export function getYearMonthInfo(yearMonth: string): YearMonthInfo {
   return { calMonth: monthAsNum, calYear: yearAsNum, firstDateOfMonth };
 }
 
+export function getYearMonthString(yearMonthInfo: YearMonthInfo): string {
+  return `${yearMonthInfo.calYear}-${yearMonthInfo.calMonth.toString().padStart(2, '0')}`
+}
+
 export function getTodaysYearMonthInfo(): YearMonthInfo {
   const today = new Date();
   const todaysYear = today.getFullYear();

@@ -4,26 +4,34 @@ import { CalendarContext } from "../CalendarContextProvider/CalendarContextProvi
 import { createCousinCalendarSvg } from "@/helpers/hobonichi-generator";
 import { getYearMonthString } from "@/helpers/calendar-helpers";
 
+const STATIC_CONTENT_ID = "static-conten";
+
 function CalendarView() {
   const { yearMonthInfo } = React.useContext(CalendarContext);
-  const svgContainer = React.useRef<HTMLDivElement>(null);
+  const svgRoot = React.useRef<SVGSVGElement>(null);
 
   React.useEffect(() => {
-    if (!svgContainer.current) {
+    if (!svgRoot.current) {
       return;
     }
-    const box = createCousinCalendarSvg(getYearMonthString(yearMonthInfo));
-    svgContainer.current.append(box);
+    const staticContents = createCousinCalendarSvg(svgRoot.current, getYearMonthString(yearMonthInfo));
+    staticContents.id = STATIC_CONTENT_ID;
+    svgRoot.current.prepend(staticContents);
     return () => {
-      if (!svgContainer.current) {
+      if (!svgRoot.current) {
         return;
       }
-      svgContainer.current.innerHTML = "";
+      const added = svgRoot.current.querySelector(`#${STATIC_CONTENT_ID}`);
+      added?.remove();
     };
-  }, [svgContainer, yearMonthInfo]);
+  }, [svgRoot, yearMonthInfo]);
   return (
     <div className={style.container}>
-      <div className={style.svgContainer} ref={svgContainer}></div>;
+      <div className={style.svgContainer}>
+        <svg ref={svgRoot}>
+          <rect x="0" y="0" height="100" width="100"></rect>
+        </svg>
+      </div>;
     </div>
   );
 }

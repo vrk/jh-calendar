@@ -24,8 +24,7 @@ function createSvgElement(name: string) {
   return document.createElementNS("http://www.w3.org/2000/svg", name);
 }
 
-export function createCousinCalendarSvg(yearMonth: string) {
-  const svg = createSvgElement("svg");
+export function createCousinCalendarSvg(svg: SVGSVGElement, yearMonth: string) {
   const graphicWidth =
     GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_WIDTH * 2;
   const graphicHeight = GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_HEIGHT;
@@ -39,6 +38,8 @@ export function createCousinCalendarSvg(yearMonth: string) {
     "xmlns:xlink",
     "http://www.w3.org/1999/xlink"
   );
+
+  const staticContentsGroup = createSvgElement("g");
 
   const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
   const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
@@ -61,12 +62,12 @@ export function createCousinCalendarSvg(yearMonth: string) {
     false,
     yearMonth
   );
-  svg.append(leftPageGrid);
-  svg.append(leftPageBoxes);
-  svg.append(rightPageGrid);
-  svg.append(rightPageBoxes);
+  staticContentsGroup.append(leftPageGrid);
+  staticContentsGroup.append(leftPageBoxes);
+  staticContentsGroup.append(rightPageGrid);
+  staticContentsGroup.append(rightPageBoxes);
 
-  return svg;
+  return staticContentsGroup;
 }
 
 function createGridsForPage(startingX: number, startingY: number) {

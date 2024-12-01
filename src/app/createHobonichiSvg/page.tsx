@@ -147,6 +147,7 @@ function createDateSquare(startingX: number, startingY: number) {
   square.setAttribute("x", `${startingX}`)
   square.setAttribute("y", `${startingY}`)
   square.setAttribute("stroke", "black");
+  square.setAttribute("shape-rendering", "crispEdges");
   square.setAttribute("fill", "transparent");
   group.append(square);
   return group;
@@ -160,6 +161,7 @@ function createLine(x1: number, y1: number, x2: number, y2: number) {
   line.setAttribute("y2", `${y2}`);
   line.setAttribute("stroke-dasharray", "2");
   line.setAttribute("stroke", "gainsboro");
+  line.setAttribute("shape-rendering", "crispEdges");
   return line;
 }
 
@@ -172,6 +174,7 @@ function createDateHeaderFill(startingX: number, startingY: number) {
 }
 
 function createHeaderFillInside(startingX: number, startingY: number, isDouble: boolean, hasBorder: boolean) {
+  const group = createSvgElement("g");
   const square = createSvgElement("rect");
   const numberBoxesTall = isDouble ? 2 * NUMBER_BOXES_IN_HEADER : NUMBER_BOXES_IN_HEADER; 
   square.setAttribute("width", `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
@@ -181,6 +184,19 @@ function createHeaderFillInside(startingX: number, startingY: number, isDouble: 
   if (hasBorder) {
     square.setAttribute("stroke", "black");
   }
+  square.setAttribute("shape-rendering", "crispEdges");
   square.setAttribute("fill", isDouble ? "gray" : "white");
-  return square;
+  //   <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">TEXT</text>    
+  const text = createSvgElement("text");
+  const offset = GRID_BOX_WIDTH_IN_PIXELS;
+  text.setAttribute("x", `${startingX + offset}`)
+  text.setAttribute("y", `${startingY + numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS / 2 + 1}`)
+  text.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`)
+  text.setAttribute("dominant-baseline", 'middle');
+  text.setAttribute("text-anchor", 'middle');
+  text.setAttribute("style", 'color: black');
+  text.innerHTML = "25";
+  group.append(square);
+  group.append(text);
+  return group;
 }

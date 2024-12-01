@@ -124,17 +124,18 @@ function createGridsForPage(startingX: number, startingY: number) {
 function createDates(
   startingX: number,
   startingY: number,
-  skipFirstColumn: boolean
+  skipFirstColumn: boolean,
+  yearMonth: string
 ) {
-  const labels = skipFirstColumn
-    ? ["", "MON", "TUE", "WED"]
-    : ["THU", "FRI", "SAT", "SUN"];
   const group = createSvgElement("g");
+
+  // Create all dates
   for (let row = 0; row < NUMBER_OF_ROWS; row++) {
     for (let col = 0; col < NUMBER_OF_COLUMNS; col++) {
       if (col === 0 && skipFirstColumn) {
         continue;
       }
+      const { dayNumber, isInMonth } = getDateInfo(row, col, skipFirstColumn, yearMonth);
 
       const x = startingX + col * NUMBER_PIXELS_PER_DAY;
       const y =
@@ -143,6 +144,11 @@ function createDates(
       group.append(dateSquare);
     }
   }
+
+  // Create date header row
+  const labels = skipFirstColumn
+    ? ["", "MON", "TUE", "WED"]
+    : ["THU", "FRI", "SAT", "SUN"];
   for (let col = 0; col < NUMBER_OF_COLUMNS; col++) {
     const x = startingX + col * NUMBER_PIXELS_PER_DAY;
     const y = startingY;
@@ -284,4 +290,18 @@ function createText(
   text.setAttribute("style", "color: black");
   text.innerHTML = message;
   return text;
+}
+
+function getDateInfo(row: number, col: number, skipFirstColumn: boolean, yearMonth: string) {
+  let dayNumber = "25";
+  let isInMonth = false;
+
+  if (skipFirstColumn) {
+    
+  } else {
+
+  }
+
+
+  return { dayNumber, isInMonth };
 }

@@ -254,6 +254,15 @@ function createMonthHeader(
   monthText.setAttribute("dominant-baseline", "bottom");
   monthText.setAttribute("text-anchor", "end");
   fillGroup.append(monthText);
+
+  const yearLabel = `${yearMonthInfo.calYear}`;
+  const yearOffset = 5;
+  const yearX = NUMBER_PIXELS_PER_MARGIN + yearOffset;
+  const yearY = NUMBER_PIXELS_PER_MARGIN + yearOffset;
+  const yearText = createTextAtSize(yearLabel, yearX, yearY, 12);
+  yearText.setAttribute("dominant-baseline", "text-before-edge");
+  yearText.setAttribute("text-anchor", "start");
+  fillGroup.append(yearText);
   return fillGroup;
 }
 
@@ -347,8 +356,8 @@ function createTextAtSize(
   text.setAttribute("y", `${startingY}`);
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("text-anchor", "middle");
-  text.setAttribute("fill", "black");
-  text.setAttribute("style", `font-size: ${size}px`);
+  text.setAttribute("fill", "white");
+  text.setAttribute("style", `font-size: ${size}px; letter-spacing: 1px;`);
   text.innerHTML = message;
   return text;
 }

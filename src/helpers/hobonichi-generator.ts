@@ -1,5 +1,3 @@
-"use client";
-import * as React from "react";
 import { add, format } from "date-fns";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
 import { getYearMonthInfo } from "@/helpers/calendar-helpers";
@@ -22,55 +20,20 @@ const NUMBER_PIXELS_PER_DAY = NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS;
 const NUMBER_PIXELS_PER_MARGIN =
   NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
 
-export default function HobonichiSvg() {
-  const overallContainer = React.useRef<HTMLDivElement>(null);
-  const [isLoaded, setIsLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!overallContainer.current || isLoaded) {
-      return;
-    }
-    const box = createCousinCalendarSvg("2021-05");
-    overallContainer.current.append(box);
-    setIsLoaded(true);
-    return () => {
-      if (!overallContainer.current) {
-        return;
-      }
-      overallContainer.current.innerHTML = "";
-    };
-  }, [overallContainer]);
-
-  return (
-    <div>
-      hi
-      <div ref={overallContainer}></div>
-    </div>
-  );
-}
-
 function createSvgElement(name: string) {
   return document.createElementNS("http://www.w3.org/2000/svg", name);
 }
 
-function createCousinCalendarSvg(yearMonth: string) {
+export function createCousinCalendarSvg(yearMonth: string) {
   const svg = createSvgElement("svg");
-  svg.setAttribute("style", "border: 1px solid black");
   const graphicWidth =
     GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_WIDTH * 2;
   const graphicHeight = GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_HEIGHT;
   svg.setAttribute("viewBox", `0 0 ${graphicWidth} ${graphicHeight}`);
+  svg.setAttribute("style", "border: 1px solid gainsboro");
   svg.setAttribute("preserveAspectRatio", "xMinYMin");
   svg.setAttribute("width", "100%");
   svg.setAttribute("height", "auto");
-  // svg.setAttribute(
-  //   "width",
-  //   `${GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_WIDTH * 2}`
-  // );
-  // svg.setAttribute(
-  //   "height",
-  //   `${GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_HEIGHT}`
-  // );
   svg.setAttributeNS(
     "http://www.w3.org/2000/xmlns/",
     "xmlns:xlink",
@@ -175,7 +138,7 @@ function createDates(
     yearMonth
   );
   while (sixthRowDateInfo.isInMonth) {
-    console.log("IS IN MONTH")
+    console.log("IS IN MONTH");
     const x = startingX + sixthRowColumn * NUMBER_PIXELS_PER_DAY;
     const y =
       startingY +
@@ -252,7 +215,10 @@ function createSixthRowDateSquare(
     "width",
     `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
   );
-  square.setAttribute("height", `${NUMBER_BOXES_PER_SIXTH_ROW_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute(
+    "height",
+    `${NUMBER_BOXES_PER_SIXTH_ROW_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+  );
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
   square.setAttribute("stroke", "black");

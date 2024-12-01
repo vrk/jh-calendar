@@ -6,7 +6,13 @@
   right: 0;
   display: flex;
   flex-direction: column;
-  overflow: scroll;
   justify-content: center;
   align-items: center;
+}
+
+.svgContainer {
+  width: 100%;
+
+  /** TODO: CHANGE IF NOT COUSIN **/
+  max-width: 1118.73792px;
 }

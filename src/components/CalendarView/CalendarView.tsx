@@ -6,22 +6,26 @@ import { getYearMonthString } from "@/helpers/calendar-helpers";
 
 function CalendarView() {
   const { yearMonthInfo } = React.useContext(CalendarContext);
-  const overallContainer = React.useRef<HTMLDivElement>(null);
+  const svgContainer = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!overallContainer.current) {
+    if (!svgContainer.current) {
       return;
     }
     const box = createCousinCalendarSvg(getYearMonthString(yearMonthInfo));
-    overallContainer.current.append(box);
+    svgContainer.current.append(box);
     return () => {
-      if (!overallContainer.current) {
+      if (!svgContainer.current) {
         return;
       }
-      overallContainer.current.innerHTML = "";
+      svgContainer.current.innerHTML = "";
     };
-  }, [overallContainer, yearMonthInfo]);
-  return <div className={style.container} ref={overallContainer}></div>;
+  }, [svgContainer, yearMonthInfo]);
+  return (
+    <div className={style.container}>
+      <div className={style.svgContainer} ref={svgContainer}></div>;
+    </div>
+  );
 }
 
 export default CalendarView;

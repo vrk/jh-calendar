@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { add } from "date-fns";
+import { add, format } from "date-fns";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -160,13 +160,14 @@ function createDates(
   const labels = skipFirstColumn
     ? ["", "MON", "TUE", "WED"]
     : ["THU", "FRI", "SAT", "SUN"];
+  const yearMonthInfo = getYearMonthInfo(yearMonth);
   for (let col = 0; col < NUMBER_OF_COLUMNS; col++) {
     const x = startingX + col * NUMBER_PIXELS_PER_DAY;
     const y = startingY;
     const isDouble = skipFirstColumn && col === 0;
     const label = labels[col];
     if (isDouble) {
-      const square = createHeaderFill(x, y, isDouble);
+      const square = createMonthHeader(x, y, yearMonthInfo);
       group.append(square);
     } else {
       const square = createDayHeader(x, y, label);
@@ -239,17 +240,30 @@ function createHeaderFill(
   return createFillSvg(startingX, startingY, isDouble, true);
 }
 
+function createMonthHeader(
+  startingX: number,
+  startingY: number,
+  yearMonthInfo: YearMonthInfo
+) {
+  const fillGroup = createHeaderFill(startingX, startingY, true);
+  const monthLabel = format(yearMonthInfo.firstDateOfMonth, "MMM").toUpperCase();
+  const monthOffset = 10;
+  const monthX = NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN - monthOffset;
+  const monthY = NUMBER_BOXES_IN_HEADER * 2 * GRID_BOX_WIDTH_IN_PIXELS + NUMBER_PIXELS_PER_MARGIN - monthOffset ;
+  const monthText = createTextAtSize(monthLabel, monthX, monthY, 28);
+  monthText.setAttribute("dominant-baseline", "bottom");
+  monthText.setAttribute("text-anchor", "end");
+  fillGroup.append(monthText);
+  return fillGroup;
+}
+
 function createDaySubheadFill(
   startingX: number,
   startingY: number,
   dateInfo: DateInfo
 ) {
   const fillGroup = createFillSvg(startingX, startingY, false, false, dateInfo);
-  const text = createDateText(
-    dateInfo,
-    startingX,
-    startingY,
-  );
+  const text = createDateText(dateInfo, startingX, startingY);
   fillGroup.append(text);
   return fillGroup;
 }
@@ -289,7 +303,6 @@ function createFillSvg(
     }
   }
   group.append(square);
-  // group.append(text);
   return group;
 }
 
@@ -319,6 +332,23 @@ function createText(
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("fill", "black");
+  text.innerHTML = message;
+  return text;
+}
+
+function createTextAtSize(
+  message: string,
+  startingX: number,
+  startingY: number,
+  size: number
+) {
+  const text = createSvgElement("text");
+  text.setAttribute("x", `${startingX}`);
+  text.setAttribute("y", `${startingY}`);
+  text.setAttribute("dominant-baseline", "middle");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("fill", "black");
+  text.setAttribute("style", `font-size: ${size}px`);
   text.innerHTML = message;
   return text;
 }
@@ -356,13 +386,11 @@ function getDateInfo(
   skipFirstColumn: boolean,
   yearMonth: string
 ): DateInfo {
-  const [year, month] = yearMonth.split("-");
-  const yearAsNum = parseInt(year);
-  const monthAsNum = parseInt(month) - 1;
-  const firstDateOfMonth = new Date(yearAsNum, monthAsNum, 1);
+  const {
+    calMonth,
+    firstDateOfMonth
+  } = getYearMonthInfo(yearMonth);
   const dayOfFirst = firstDateOfMonth.getDay();
-  // dayOfFirst = 3;
-
   if (skipFirstColumn && col === 0) {
     throw new Error("shouldn't have date info");
   }
@@ -375,8 +403,25 @@ function getDateInfo(
     days: offsetFromFirstDay,
   });
   const dateNumber = todaysDate.getDate();
-  const isInMonth = todaysDate.getMonth() === monthAsNum;
+  const isInMonth = todaysDate.getMonth() === calMonth;
   const dayOfWeek = todaysDate.getDay();
 
-  return { dateNumber, isInMonth, dayOfWeek };
+  return {
+    dateNumber,
+    isInMonth,
+    dayOfWeek
+  };
+}
+
+type YearMonthInfo = {
+  calMonth: number;
+  calYear: number;
+  firstDateOfMonth: Date
+};
+function getYearMonthInfo(yearMonth: string): YearMonthInfo {
+  const [year, month] = yearMonth.split("-");
+  const yearAsNum = parseInt(year);
+  const monthAsNum = parseInt(month) - 1;
+  const firstDateOfMonth = new Date(yearAsNum, monthAsNum, 1);
+  return { calMonth: monthAsNum, calYear: yearAsNum, firstDateOfMonth };
 }

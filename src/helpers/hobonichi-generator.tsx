@@ -457,12 +457,19 @@ function getDateInfo(
 type ClickableDateProps = {
   dayInMonth: number;
   yearMonthInfo: YearMonthInfo;
-}
-export function ClickableDate({ dayInMonth, yearMonthInfo}: ClickableDateProps ) {
-  const itemWidth = 100;
-  const itemHeight = 100;
+};
+export function ClickableDate({
+  dayInMonth,
+  yearMonthInfo,
+}: ClickableDateProps) {
+  const itemWidth = 50;
+  const itemHeight = 50;
 
-  const today = new Date(yearMonthInfo.calYear, yearMonthInfo.calMonth, dayInMonth);
+  const today = new Date(
+    yearMonthInfo.calYear,
+    yearMonthInfo.calMonth,
+    dayInMonth
+  );
 
   let todaysDay = today.getDay();
   if (todaysDay === 0) {
@@ -483,10 +490,56 @@ export function ClickableDate({ dayInMonth, yearMonthInfo}: ClickableDateProps )
 
   const widthDelta = NUMBER_PIXELS_PER_DAY - itemWidth;
   const x = margin + todaysDay * NUMBER_PIXELS_PER_DAY + widthDelta / 2;
+  const cx =
+    margin + todaysDay * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_DAY / 2;
   const heightDelta = NUMBER_PIXELS_PER_DAY - itemHeight;
-  const y = weekNumber * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN * 2 + heightDelta / 2;
+  const y =
+    weekNumber * NUMBER_PIXELS_PER_DAY +
+    NUMBER_PIXELS_PER_MARGIN * 2 +
+    heightDelta / 2;
+  const cy =
+    weekNumber * NUMBER_PIXELS_PER_DAY +
+    NUMBER_PIXELS_PER_MARGIN * 2 +
+    NUMBER_PIXELS_PER_DAY / 2;
 
-  return <g>
-      <rect x={x} y={y} height={itemWidth} width={itemHeight} fill="yellow"></rect>;
+  const lengthOfPlus = itemWidth / 3;
+  const plusX1 =
+    margin +
+    todaysDay * NUMBER_PIXELS_PER_DAY +
+    NUMBER_PIXELS_PER_DAY / 2 -
+    lengthOfPlus / 2;
+  const plusY1 =
+    weekNumber * NUMBER_PIXELS_PER_DAY +
+    NUMBER_PIXELS_PER_MARGIN * 2 +
+    NUMBER_PIXELS_PER_DAY / 2;
+  const path1 = `M${plusX1} ${plusY1} H${plusX1 + lengthOfPlus}`;
+
+  const plusX2 =
+    margin + todaysDay * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_DAY / 2;
+  const plusY2 =
+    weekNumber * NUMBER_PIXELS_PER_DAY +
+    NUMBER_PIXELS_PER_MARGIN * 2 +
+    NUMBER_PIXELS_PER_DAY / 2 -
+    lengthOfPlus / 2;
+  const path2 = `M${plusX2} ${plusY2} V${plusY2 + lengthOfPlus}`;
+
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={itemWidth / 2} fill="lightgray"></circle>
+      <Line path={path1}></Line>
+      <Line path={path2}></Line>
     </g>
+  );
+}
+
+function Line({ path }: { path: string }) {
+  return (
+    <path
+      d={path}
+      stroke="gray"
+      strokeWidth="5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  );
 }

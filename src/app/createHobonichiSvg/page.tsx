@@ -1,6 +1,8 @@
 "use client";
 import * as React from "react";
 import { add, format } from "date-fns";
+import { YearMonthInfo } from "@/helpers/calendar-data-types";
+import { getYearMonthInfo } from "@/helpers/calendar-helpers";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -12,6 +14,7 @@ const NUMBER_BOXES_PER_PAGE_WIDTH = 40;
 const NUMBER_BOXES_PER_PAGE_HEIGHT = 57;
 
 const NUMBER_BOXES_PER_DAY = 9;
+const NUMBER_BOXES_PER_SIXTH_ROW_DAY = 6;
 const NUMBER_OF_COLUMNS = 4;
 const NUMBER_OF_ROWS = 5;
 
@@ -27,7 +30,7 @@ export default function HobonichiSvg() {
     if (!overallContainer.current || isLoaded) {
       return;
     }
-    const box = createCousinSvg("2021-05");
+    const box = createCousinCalendarSvg("2021-05");
     overallContainer.current.append(box);
     setIsLoaded(true);
     return () => {
@@ -50,7 +53,7 @@ function createSvgElement(name: string) {
   return document.createElementNS("http://www.w3.org/2000/svg", name);
 }
 
-function createCousinSvg(yearMonth: string) {
+function createCousinCalendarSvg(yearMonth: string) {
   const svg = createSvgElement("svg");
   svg.setAttribute("style", "border: 1px solid black");
   svg.setAttribute(
@@ -242,7 +245,7 @@ function createSixthRowDateSquare(
     "width",
     `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
   );
-  square.setAttribute("height", `${6 * GRID_BOX_WIDTH_IN_PIXELS}`);
+  square.setAttribute("height", `${NUMBER_BOXES_PER_SIXTH_ROW_DAY * GRID_BOX_WIDTH_IN_PIXELS}`);
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
   square.setAttribute("stroke", "black");
@@ -475,17 +478,4 @@ function getDateInfo(
     isInMonth,
     dayOfWeek,
   };
-}
-
-type YearMonthInfo = {
-  calMonth: number;
-  calYear: number;
-  firstDateOfMonth: Date;
-};
-function getYearMonthInfo(yearMonth: string): YearMonthInfo {
-  const [year, month] = yearMonth.split("-");
-  const yearAsNum = parseInt(year);
-  const monthAsNum = parseInt(month) - 1;
-  const firstDateOfMonth = new Date(yearAsNum, monthAsNum, 1);
-  return { calMonth: monthAsNum, calYear: yearAsNum, firstDateOfMonth };
 }

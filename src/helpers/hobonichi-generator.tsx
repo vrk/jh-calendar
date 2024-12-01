@@ -459,13 +459,34 @@ type ClickableDateProps = {
   yearMonthInfo: YearMonthInfo;
 }
 export function ClickableDate({ dayInMonth, yearMonthInfo}: ClickableDateProps ) {
-  let dayOfFirst = yearMonthInfo.firstDateOfMonth.getDay();
-  if (dayOfFirst === 0) {
-    dayOfFirst = 7;
+  const itemWidth = 100;
+  const itemHeight = 100;
+
+  const today = new Date(yearMonthInfo.calYear, yearMonthInfo.calMonth, dayInMonth);
+
+  let todaysDay = today.getDay();
+  if (todaysDay === 0) {
+    todaysDay = 7;
   }
-  const x = 10;
-  const y = 10;
+  let margin = NUMBER_PIXELS_PER_MARGIN;
+  if (todaysDay > 3) {
+    margin *= 3;
+  }
 
+  // Remap offsets to have a Monday start - that means day - 1, but change -1 (sunday) to 6 (last)
+  let offset = yearMonthInfo.firstDateOfMonth.getDay() - 1;
+  if (offset === -1) {
+    offset = 6;
+  }
+  const zeroIndexedDate = today.getDate() - 1;
+  const weekNumber = Math.floor((zeroIndexedDate + offset) / 7);
 
-  return <rect x={x} y={y} height="100" width="100"></rect>;
+  const widthDelta = NUMBER_PIXELS_PER_DAY - itemWidth;
+  const x = margin + todaysDay * NUMBER_PIXELS_PER_DAY + widthDelta / 2;
+  const heightDelta = NUMBER_PIXELS_PER_DAY - itemHeight;
+  const y = weekNumber * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN * 2 + heightDelta / 2;
+
+  return <g>
+      <rect x={x} y={y} height={itemWidth} width={itemHeight} fill="yellow"></rect>;
+    </g>
 }

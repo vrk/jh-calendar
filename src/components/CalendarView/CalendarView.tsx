@@ -3,6 +3,7 @@ import style from "./CalendarView.module.css";
 import { CalendarContext } from "../CalendarContextProvider/CalendarContextProvider";
 import { createCousinCalendarSvg, ClickableDate } from "@/helpers/hobonichi-generator";
 import { getYearMonthString } from "@/helpers/calendar-helpers";
+import { getDaysInMonth } from "date-fns";
 
 const STATIC_CONTENT_ID = "static-conten";
 
@@ -25,11 +26,18 @@ function CalendarView() {
       added?.remove();
     };
   }, [svgRoot, yearMonthInfo]);
+  const numberDaysInMonth = getDaysInMonth(yearMonthInfo.firstDateOfMonth);
+  const daysInMonth = [];
+  for (let i = 1; i <= numberDaysInMonth; i++) {
+    daysInMonth.push(i);
+  }
   return (
     <div className={style.container}>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
-          <ClickableDate dayInMonth={1} yearMonthInfo={yearMonthInfo}></ClickableDate>
+          {daysInMonth.map((dayInMonth) => (
+            <ClickableDate key={dayInMonth} dayInMonth={dayInMonth} yearMonthInfo={yearMonthInfo}></ClickableDate>
+          ))}
         </svg>
       </div>;
     </div>

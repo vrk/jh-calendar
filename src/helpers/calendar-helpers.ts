@@ -9,7 +9,7 @@ export function getYearMonthInfo(yearMonth: string): YearMonthInfo {
 }
 
 export function getYearMonthString(yearMonthInfo: YearMonthInfo): string {
-  return `${yearMonthInfo.calYear}-${yearMonthInfo.calMonth.toString().padStart(2, '0')}`
+  return `${yearMonthInfo.calYear}-${(yearMonthInfo.calMonth + 1).toString().padStart(2, '0')}`
 }
 
 export function getTodaysYearMonthInfo(): YearMonthInfo {

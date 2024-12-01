@@ -7,7 +7,8 @@ import {
   ValidDate,
   YearMonthInfo,
 } from "@/helpers/calendar-data-types";
-import { getTodaysYearMonthInfo } from "@/helpers/calendar-helpers";
+import { getTodaysYearMonthInfo, getYearMonthInfo } from "@/helpers/calendar-helpers";
+import { loadYearMonthInfo, saveYearMonthInfo } from "@/helpers/indexeddb";
 import React from "react";
 
 type CalendarFunctions = {
@@ -84,8 +85,9 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
   const [loadedStatus, setLoadedStatus] = React.useState(
     LoadedStatus.Uninitialized
   );
-  const [yearMonthInfo, setYearMonthInfo] = React.useState(
-    getTodaysYearMonthInfo()
+  const loadedInfo = loadYearMonthInfo();
+  const [yearMonthInfo, setYearMonthInfoState] = React.useState(
+    loadedInfo ? loadedInfo : getTodaysYearMonthInfo()
   );
   const [thumbnailsOfFullImages, setThumbnailsOfFullImages] = React.useState(
     new Map<string, ImageData>()
@@ -122,7 +124,8 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
       throw new Error("Function not implemented.");
     },
     setYearMonth: function (yearMonth: string): void {
-      throw new Error("Function not implemented.");
+      saveYearMonthInfo(yearMonth);
+      setYearMonthInfoState(getYearMonthInfo(yearMonth));
     },
     clearCalendar: function (): void {
       throw new Error("Function not implemented.");

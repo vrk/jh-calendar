@@ -281,6 +281,13 @@ function createFillSvg(
   }
   square.setAttribute("shape-rendering", "crispEdges");
   square.setAttribute("fill", isDouble ? "gray" : "white");
+  if (dateInfo && dateInfo.isInMonth) {
+    if (dateInfo.dayOfWeek === 6) {
+      square.setAttribute("fill", "gainsboro");
+    } else if (dateInfo.dayOfWeek === 0) {
+      square.setAttribute("fill", "pink");
+    }
+  }
   group.append(square);
   // group.append(text);
   return group;

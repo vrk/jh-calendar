@@ -27,7 +27,7 @@ export default function HobonichiSvg() {
     if (!overallContainer.current || isLoaded) {
       return;
     }
-    const box = createCousinSvg("2024-12");
+    const box = createCousinSvg("2021-05");
     overallContainer.current.append(box);
     setIsLoaded(true);
     return () => {
@@ -156,6 +156,32 @@ function createDates(
     }
   }
 
+  // Check if we've got 6 rows
+  let sixthRowColumn = 1;
+  let sixthRowDateInfo = getDateInfo(
+    NUMBER_OF_ROWS,
+    sixthRowColumn,
+    skipFirstColumn,
+    yearMonth
+  );
+  while (sixthRowDateInfo.isInMonth) {
+    console.log("IS IN MONTH")
+    const x = startingX + sixthRowColumn * NUMBER_PIXELS_PER_DAY;
+    const y =
+      startingY +
+      NUMBER_OF_ROWS * NUMBER_PIXELS_PER_DAY +
+      NUMBER_PIXELS_PER_MARGIN;
+    const dateSquare = createSixthRowDateSquare(x, y, sixthRowDateInfo);
+    group.append(dateSquare);
+    sixthRowColumn++;
+    sixthRowDateInfo = getDateInfo(
+      NUMBER_OF_ROWS,
+      sixthRowColumn,
+      skipFirstColumn,
+      yearMonth
+    );
+  }
+
   // Create date header row
   const labels = skipFirstColumn
     ? ["", "MON", "TUE", "WED"]
@@ -194,6 +220,29 @@ function createDateSquare(
     "height",
     `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
   );
+  square.setAttribute("x", `${startingX}`);
+  square.setAttribute("y", `${startingY}`);
+  square.setAttribute("stroke", "black");
+  square.setAttribute("shape-rendering", "crispEdges");
+  square.setAttribute("fill", "transparent");
+  group.append(square);
+  return group;
+}
+
+function createSixthRowDateSquare(
+  startingX: number,
+  startingY: number,
+  dateInfo: DateInfo
+) {
+  const group = createSvgElement("g");
+  const squareFill = createDaySubheadFill(startingX, startingY, dateInfo);
+  group.append(squareFill);
+  const square = createSvgElement("rect");
+  square.setAttribute(
+    "width",
+    `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+  );
+  square.setAttribute("height", `${6 * GRID_BOX_WIDTH_IN_PIXELS}`);
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
   square.setAttribute("stroke", "black");
@@ -246,10 +295,16 @@ function createMonthHeader(
   yearMonthInfo: YearMonthInfo
 ) {
   const fillGroup = createHeaderFill(startingX, startingY, true);
-  const monthLabel = format(yearMonthInfo.firstDateOfMonth, "MMM").toUpperCase();
+  const monthLabel = format(
+    yearMonthInfo.firstDateOfMonth,
+    "MMM"
+  ).toUpperCase();
   const monthOffset = 10;
   const monthX = NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN - monthOffset;
-  const monthY = NUMBER_BOXES_IN_HEADER * 2 * GRID_BOX_WIDTH_IN_PIXELS + NUMBER_PIXELS_PER_MARGIN - monthOffset ;
+  const monthY =
+    NUMBER_BOXES_IN_HEADER * 2 * GRID_BOX_WIDTH_IN_PIXELS +
+    NUMBER_PIXELS_PER_MARGIN -
+    monthOffset;
   const monthText = createTextAtSize(monthLabel, monthX, monthY, 28);
   monthText.setAttribute("dominant-baseline", "bottom");
   monthText.setAttribute("text-anchor", "end");
@@ -395,10 +450,7 @@ function getDateInfo(
   skipFirstColumn: boolean,
   yearMonth: string
 ): DateInfo {
-  const {
-    calMonth,
-    firstDateOfMonth
-  } = getYearMonthInfo(yearMonth);
+  const { calMonth, firstDateOfMonth } = getYearMonthInfo(yearMonth);
   let dayOfFirst = firstDateOfMonth.getDay();
   if (dayOfFirst === 0) {
     dayOfFirst = 7;
@@ -421,14 +473,14 @@ function getDateInfo(
   return {
     dateNumber,
     isInMonth,
-    dayOfWeek
+    dayOfWeek,
   };
 }
 
 type YearMonthInfo = {
   calMonth: number;
   calYear: number;
-  firstDateOfMonth: Date
+  firstDateOfMonth: Date;
 };
 function getYearMonthInfo(yearMonth: string): YearMonthInfo {
   const [year, month] = yearMonth.split("-");

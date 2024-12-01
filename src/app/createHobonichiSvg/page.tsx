@@ -27,7 +27,7 @@ export default function HobonichiSvg() {
     if (!overallContainer.current || isLoaded) {
       return;
     }
-    const box = createCousinSvg("2024-11");
+    const box = createCousinSvg("2024-12");
     overallContainer.current.append(box);
     setIsLoaded(true);
     return () => {
@@ -399,7 +399,10 @@ function getDateInfo(
     calMonth,
     firstDateOfMonth
   } = getYearMonthInfo(yearMonth);
-  const dayOfFirst = firstDateOfMonth.getDay();
+  let dayOfFirst = firstDateOfMonth.getDay();
+  if (dayOfFirst === 0) {
+    dayOfFirst = 7;
+  }
   if (skipFirstColumn && col === 0) {
     throw new Error("shouldn't have date info");
   }

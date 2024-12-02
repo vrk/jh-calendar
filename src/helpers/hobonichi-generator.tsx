@@ -288,6 +288,7 @@ export function DateSquare({
       }
       const added = svgRoot.current.querySelector(`#${staticContents.id}`);
       added?.remove();
+      console.log("removing!");
     };
   }, [svgRoot, dateNumber, yearMonthInfo]);
   return <svg ref={svgRoot}>{children}</svg>;
@@ -313,21 +314,60 @@ type DateSquarePreviewProps = {
   boundingBox: BoundingBoxValue;
   cropNumberBoxesWide: number;
   cropNumberBoxesTall: number;
+  uniqueid: string;
 };
-export function DateSquarePreview({
+export function DateSquarePreview(props: React.PropsWithRef<DateSquarePreviewProps>) {
+  const imageContainerRoot = React.useRef<HTMLDivElement | null>(null);
+  const boundingClass =
+  props.boundingBox === "square" ? style.boundingSquare : style.boundingWritable;
+  const [isRefVisible, setIsRefVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    console.log("rerendering", props.dateNumber);
+    if (!imageContainerRoot.current) {
+      return;
+    }
+    const remove = addImage(imageContainerRoot.current,props);
+    return remove;
+  }, [
+    isRefVisible,
+  ]);
+  return (
+    <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
+      <div
+        ref={(el) => {
+          console.log("HERE", props.dateNumber, el);
+          imageContainerRoot.current = el;
+          setIsRefVisible(!!el);
+          if (el) {
+            addImage(el, props);
+          }
+        }}
+        className={`${style.photoPreviewContainer} ${boundingClass}`}
+      ></div>
+    </foreignObject>
+  );
+}
+
+function addImage(
+  el: HTMLDivElement,
+  {
   dateNumber,
   yearMonthInfo,
   previewImage,
   boundingBox,
   cropNumberBoxesWide,
   cropNumberBoxesTall,
-}: DateSquarePreviewProps) {
-  const imageContainerRoot = React.useRef<HTMLDivElement>(null);
-  const boundingClass =
-    boundingBox === "square" ? style.boundingSquare : style.boundingWritable;
+  uniqueid,
+} : DateSquarePreviewProps) {
 
-  React.useEffect(() => {
-    if (!imageContainerRoot.current || !previewImage || !dateNumber) {
+    if (!el || !previewImage || !dateNumber) {
+      console.log(
+        "EARLY RETURN",
+        dateNumber,
+        previewImage,
+        el
+      );
       return;
     }
 
@@ -337,46 +377,33 @@ export function DateSquarePreview({
       dateNumber
     );
     const maxBounds = getDateSquareBoundsForDate(selectedDate);
-    imageContainerRoot.current.style.width = `${
+    el.style.width = `${
       maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
     }px`;
     const maxBoxesTall =
       boundingBox === "square"
         ? maxBounds.totalBoxesTallWholeSquare
         : maxBounds.totalBoxesTallWritable;
-    imageContainerRoot.current.style.height = `${
+        el.style.height = `${
       maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
     }px`;
 
-    previewImage.id = "--preview-image--";
-    imageContainerRoot.current.append(previewImage);
+    previewImage.id = `${uniqueid}--preview-image--${dateNumber}`;
+    el.append(previewImage);
     previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
     previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+    console.log("adding back", previewImage.id);
     return () => {
-      if (!imageContainerRoot.current) {
+      if (!el) {
         return;
       }
-      const added = imageContainerRoot.current.querySelector(
+      const added = el.querySelector(
         `#${previewImage.id}`
       );
       added?.remove();
+      console.log("removing!!!!!!", previewImage.id);
     };
-  }, [
-    imageContainerRoot,
-    dateNumber,
-    previewImage,
-    boundingBox,
-    cropNumberBoxesTall,
-    cropNumberBoxesWide,
-  ]);
-  return (
-    <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
-      <div
-        ref={imageContainerRoot}
-        className={`${style.photoPreviewContainer} ${boundingClass}`}
-      ></div>
-    </foreignObject>
-  );
+
 }
 
 function createSixthRowDateSquare(
@@ -698,9 +725,15 @@ export function HobonichiCousinClickableDate({
     );
   } else {
     const newX = margin + todaysDay * NUMBER_PIXELS_PER_DAY;
-    const newY = weekNumber * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN * 2;
+    const newY =
+      weekNumber * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN * 2;
     return (
-      <svg x={newX} y={newY} height={heightOfMyBox} width={NUMBER_PIXELS_PER_DAY}>
+      <svg
+        x={newX}
+        y={newY}
+        height={heightOfMyBox}
+        width={NUMBER_PIXELS_PER_DAY}
+      >
         <DateSquarePreview
           dateNumber={dayInMonth}
           yearMonthInfo={yearMonthInfo}
@@ -708,6 +741,7 @@ export function HobonichiCousinClickableDate({
           boundingBox={fullCroppedPhotoInfo.metadata.boundingBox}
           cropNumberBoxesWide={fullCroppedPhotoInfo.metadata.squaresWide}
           cropNumberBoxesTall={fullCroppedPhotoInfo.metadata.squaresTall}
+          uniqueid="calendar-preview"
         ></DateSquarePreview>
       </svg>
     );

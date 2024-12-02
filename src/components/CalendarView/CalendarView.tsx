@@ -18,16 +18,21 @@ import { FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
-  const { yearMonthInfo, calendarFunctions } = React.useContext(CalendarContext);
+  const { yearMonthInfo, calendarFunctions } =
+    React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
   const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
-  const [imageToCrop, setImageToCrop] = React.useState<HTMLImageElement|null>(null);
-  const [selectedDayNumber, setSelectedDayNumber] = React.useState<number|null>(null);
+  const [imageToCrop, setImageToCrop] = React.useState<HTMLImageElement | null>(
+    null
+  );
+  const [selectedDayNumber, setSelectedDayNumber] = React.useState<
+    number | null
+  >(null);
 
-  const loadedImagesCache = React.useMemo(() => {
-    return new Map<number, FullCroppedPhotoInfo>()
-  }, []);
+  const [loadedImagesCache, setLoadedImagesCache] = React.useState(
+    new Map<number, FullCroppedPhotoInfo>()
+  );
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -78,10 +83,19 @@ function CalendarView() {
           const fullCroppedPhotoInfo: FullCroppedPhotoInfo = {
             fullImage: imageToCrop,
             croppedImage: croppedImage,
-            metadata: croppedpHotoMetadata
-          }
-          calendarFunctions.setPhotoForDate(selectedDayNumber as ValidDate, fullCroppedPhotoInfo)
-          loadedImagesCache.set(selectedDayNumber, fullCroppedPhotoInfo);
+            metadata: croppedpHotoMetadata,
+          };
+          calendarFunctions.setPhotoForDate(
+            selectedDayNumber as ValidDate,
+            fullCroppedPhotoInfo
+          );
+          setLoadedImagesCache(
+            new Map(loadedImagesCache).set(
+              selectedDayNumber,
+              fullCroppedPhotoInfo
+            )
+          );
+          console.log(loadedImagesCache);
         }}
         onOpenChange={(isOpen) => {
           setIsCropDialogOpen(isOpen);
@@ -94,17 +108,22 @@ function CalendarView() {
       ></CropModal>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
-          {daysInMonth.map((dayInMonth) => (
-            <HobonichiCousinClickableDate
-              key={dayInMonth}
-              dayInMonth={dayInMonth}
-              yearMonthInfo={yearMonthInfo}
-              fullCroppedPhotoInfo={loadedImagesCache.get(dayInMonth) || null}
-              onClick={() => {
-                getFileForDay(dayInMonth);
-              }}
-            ></HobonichiCousinClickableDate>
-          ))}
+          {daysInMonth.map((today) => {
+            const loaded = loadedImagesCache.get(today);
+            console.log('rerendering');
+
+            return (
+              <HobonichiCousinClickableDate
+              key={today}
+                dayInMonth={today}
+                yearMonthInfo={yearMonthInfo}
+                fullCroppedPhotoInfo={loaded ? { ...loaded } : null}
+                onClick={() => {
+                  getFileForDay(today);
+                }}
+              ></HobonichiCousinClickableDate>
+            );
+          })}
         </svg>
       </div>
     </div>

@@ -99,6 +99,7 @@ const CropModal = ({
             boundingBox={boundingBox}
             cropNumberBoxesTall={cropNumberBoxesTall}
             cropNumberBoxesWide={cropNumberBoxesWide}
+            uniqueid="modal-preview"
           ></DateSquarePreview>
         </DateSquare>
         <DropdownSelect<BoundingBoxValue>

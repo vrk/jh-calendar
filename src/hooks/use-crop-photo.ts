@@ -12,7 +12,8 @@ import { RawImageData } from "@/helpers/calendar-data-types";
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,
-  imageToCrop: HTMLImageElement | null
+  imageToCrop: HTMLImageElement | null,
+  aspectRatio: number
 ) {
   React.useEffect(() => {
     console.log("hi hi");
@@ -36,9 +37,16 @@ function useCropPhoto(
       stroke: "black",
       strokeWidth: 2,
       cornerStyle: "circle",
+      lockRotation: true,
+      lockSkewingX: true,
+      lockSkewingY: true,
       transparentCorners: false,
       visible: true,
     });
+    rectangle.controls.mt.setVisibility(false, "", rectangle);
+    rectangle.controls.ml.setVisibility(false, "", rectangle);
+    rectangle.controls.mb.setVisibility(false, "", rectangle);
+    rectangle.controls.mr.setVisibility(false, "", rectangle);
     fabricCanvas.add(rectangle);
     fabricCanvas.centerObject(rectangle);
     fabricCanvas.setActiveObject(rectangle);
@@ -76,7 +84,7 @@ function useCropPhoto(
       fabricCanvas.off("object:moving", onMove);
       fabricCanvas.off("object:scaling", onScaleMove);
     };
-  }, [fabricCanvas, imageToCrop]);
+  }, [fabricCanvas, imageToCrop, aspectRatio]);
 }
 
 function clampToBounds(bounds: FabricImage, movingObject: FabricObject) {

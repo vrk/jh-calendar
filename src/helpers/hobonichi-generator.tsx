@@ -289,17 +289,33 @@ export function DateSquare({
   return <svg ref={svgRoot}>{children}</svg>;
 }
 
+export function getDateSquareBoundsForDate(date: Date) {
+  const weekNumber = getWeekNumber(date);
+  const boxesTall = weekNumber === 5? NUMBER_BOXES_PER_SIXTH_ROW_DAY : NUMBER_BOXES_PER_DAY;
+  const values = {
+    totalBoxesInHeader: NUMBER_BOXES_IN_HEADER,
+    totalBoxesTallWholeSquare: boxesTall, 
+    totalBoxesTallWritable: boxesTall - NUMBER_BOXES_IN_HEADER, 
+    totalBoxesWide: NUMBER_BOXES_PER_DAY
+  }
+  return values;
+}
+
+type BoundingBoxValue = "square"|"writable-space"
 type DateSquarePreviewProps = {
   dateNumber: number | null;
   yearMonthInfo: YearMonthInfo;
-  previewImage: HTMLImageElement | null
+  previewImage: HTMLImageElement | null;
+  boundingBox: BoundingBoxValue; 
 };
 export function DateSquarePreview({
   dateNumber,
   yearMonthInfo,
-  previewImage
+  previewImage,
+  boundingBox
 }: DateSquarePreviewProps) {
   const imageContainerRoot = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     if (!imageContainerRoot.current || !previewImage) {
       return;

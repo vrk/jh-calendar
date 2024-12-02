@@ -50,7 +50,6 @@ function CalendarView() {
   const getFileForDay = async (dayInMonth: number) => {
     setIsCropDialogOpen(true);
     const files = await getFileFromFilePicker(PhotoSelectionType.Single);
-    console.log(files);
     if (!files || files.length === 0) {
       return;
     }
@@ -66,6 +65,9 @@ function CalendarView() {
         onConfirm={() => {}}
         onOpenChange={(isOpen) => {
           setIsCropDialogOpen(isOpen);
+          if (!isOpen) {
+            setImageToCrop(null);
+          }
         }}
         imageToCrop={imageToCrop}
       ></CropModal>

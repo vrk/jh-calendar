@@ -20,10 +20,16 @@ function useCropPhoto(fabricCanvas: Canvas | null, imageToCrop: HTMLImageElement
     const fabricImage = new FabricImage(imageToCrop, {
       selectable: false
     });
+    const scale = util.findScaleToFit(fabricImage, fabricCanvas);
+    fabricImage.scale(scale);
     fabricCanvas.add(fabricImage);
     fabricCanvas.centerObject(fabricImage);
     fabricCanvas.requestRenderAll();
     console.log('hi')
+    return () => {
+      fabricCanvas.remove(fabricImage);
+      fabricCanvas.remove(rectangle);
+    }
   }, [fabricCanvas, imageToCrop]);
 }
 

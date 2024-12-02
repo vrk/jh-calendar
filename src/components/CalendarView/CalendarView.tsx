@@ -10,7 +10,7 @@ import { getDaysInMonth } from "date-fns";
 import CropModal from "../CropModal";
 import {
   getFileFromFilePicker as getFileFromFilePicker,
-  getRawImageDataFromFile,
+  getImageFromFile,
   PhotoSelectionType,
 } from "@/helpers/file-input";
 
@@ -19,7 +19,9 @@ const STATIC_CONTENT_ID = "static-conten";
 function CalendarView() {
   const { yearMonthInfo } = React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
-  const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(true);
+  const totalRoot = React.useRef<HTMLDivElement>(null);
+  const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
+  const [imageToCrop, setImageToCrop] = React.useState<HTMLImageElement|null>(null);
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -47,21 +49,25 @@ function CalendarView() {
 
   const getFileForDay = async (dayInMonth: number) => {
     setIsCropDialogOpen(true);
-    // const files = await getFileFromFilePicker(PhotoSelectionType.Single);
-    // if (!files || files.length === 0) {
-    //   return;
-    // }
-    // const file = files[0];
-    // const rawImageData = await getRawImageDataFromFile(file);
+    const files = await getFileFromFilePicker(PhotoSelectionType.Single);
+    console.log(files);
+    if (!files || files.length === 0) {
+      return;
+    }
+    const file = files[0];
+    const loadedData = await getImageFromFile(file);
+    setImageToCrop(loadedData.imageElement);
+    console.log('setting new image elemen');
   };
   return (
-    <div className={style.container}>
+    <div className={style.container} ref={totalRoot}>
       <CropModal
         isOpen={isCropDialogOpen}
         onConfirm={() => {}}
         onOpenChange={(isOpen) => {
           setIsCropDialogOpen(isOpen);
         }}
+        imageToCrop={imageToCrop}
       ></CropModal>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>

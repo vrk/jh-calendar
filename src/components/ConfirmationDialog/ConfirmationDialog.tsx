@@ -31,9 +31,10 @@ const ConfirmationDialog = ({
           {title}
         </AlertDialog.Title>
 
-        <AlertDialog.Description className={styles.AlertDialogDescription}>
+        <AlertDialog.Description></AlertDialog.Description>
+        <div className={styles.AlertDialogDescription}>
           {children}
-        </AlertDialog.Description>
+        </div>
 
         <div style={{ display: "flex", gap: 25, justifyContent: "flex-end" }}>
           <AlertDialog.Cancel asChild>

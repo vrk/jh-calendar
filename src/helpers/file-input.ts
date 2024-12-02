@@ -1,12 +1,14 @@
-import { RawImageData } from './calendar-data-types';
-import { getMaxReasonablePhotoSizeHobonichiCousin } from './print-helpers';
+import { RawImageData } from "./calendar-data-types";
+import { getMaxReasonablePhotoSizeHobonichiCousin } from "./print-helpers";
 
 export enum PhotoSelectionType {
   Single,
-  Multi
+  Multi,
 }
 
-export async function getFileFromFilePicker(type: PhotoSelectionType): Promise<FileList | null> {
+export async function getFileFromFilePicker(
+  type: PhotoSelectionType
+): Promise<FileList | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -25,29 +27,41 @@ export async function getFileFromFilePicker(type: PhotoSelectionType): Promise<F
 }
 
 async function createImageElement(file: File): Promise<HTMLImageElement> {
+  return createImageElementWithSrc(URL.createObjectURL(file));
+}
+
+async function createImageElementWithSrc(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const image = new Image();
     image.addEventListener("load", function () {
       resolve(image);
     });
-    image.src = URL.createObjectURL(file);
+    image.src = src;
   });
 }
 
-export async function getRawImageDataFromFile(file: File): Promise<RawImageData> {
-  const imageElement = await createImageElement(file)
-  const { width, height } = getMaxReasonablePhotoSizeHobonichiCousin()
-  const cappedImage = resizeImage(imageElement, width, height);
-  if (!cappedImage) {
+type LoadedImage = {
+  imageElement: HTMLImageElement;
+  rawData: RawImageData;
+};
+export async function getImageFromFile(file: File): Promise<LoadedImage> {
+  const fullsizeImageElement = await createImageElement(file);
+  const { width, height } = getMaxReasonablePhotoSizeHobonichiCousin();
+  const scaledImage = resizeImage(fullsizeImageElement, width, height);
+  if (!scaledImage) {
     throw new Error(`Could not load image from file: ${file.name}`);
   }
-  return cappedImage;
+  const resizedImageElement = await createImageElementWithSrc(scaledImage.data);
+  return {
+    imageElement: resizedImageElement,
+    rawData: scaledImage,
+  };
 }
 
 function resizeImage(
   imageElement: HTMLImageElement,
   maxWidth: number,
-  maxHeight: number,
+  maxHeight: number
 ): RawImageData | null {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");

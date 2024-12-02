@@ -8,14 +8,22 @@ import {
   DateSquarePreview,
   getDateSquareBoundsForDate,
 } from "@/helpers/hobonichi-generator";
-import { BoundingBoxValue, ClipPathInfo, FullCroppedPhotoInfo, YearMonthInfo } from "@/helpers/calendar-data-types";
+import {
+  BoundingBoxValue,
+  ClipPathInfo,
+  CroppedPhotoMetadata,
+  YearMonthInfo,
+} from "@/helpers/calendar-data-types";
 import DropdownSelect from "../DropdownSelect";
 
 type Props = {
   isOpen: boolean;
   dateNumber: number | null;
   yearMonthInfo: YearMonthInfo;
-  onConfirm: (croppedImage: HTMLImageElement, fullCroppedPhotoInfo: FullCroppedPhotoInfo) => void;
+  onConfirm: (
+    croppedImage: HTMLImageElement,
+    fullCroppedPhotoInfo: CroppedPhotoMetadata
+  ) => void;
   onOpenChange: (isOpen: boolean) => void;
   imageToCrop: HTMLImageElement | null;
 };
@@ -30,8 +38,11 @@ const CropModal = ({
 }: React.PropsWithChildren<Props>) => {
   const [boundingBox, setBoundingBox] =
     React.useState<BoundingBoxValue>("writable-space");
-  const [previewImage, setPreviewImage] = React.useState<HTMLImageElement|null>(null);
-  const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo|null>(null);
+  const [previewImage, setPreviewImage] =
+    React.useState<HTMLImageElement | null>(null);
+  const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo | null>(
+    null
+  );
 
   const selectedDate = new Date(
     yearMonthInfo.calYear,
@@ -51,14 +62,14 @@ const CropModal = ({
     if (!previewImage || !clipPathInfo) {
       return;
     }
-    const photoInfo: FullCroppedPhotoInfo = {
+    const photoInfo: CroppedPhotoMetadata = {
       clipPathInfo,
       boundingBox: boundingBox,
       squaresWide: cropNumberBoxesWide,
-      squaresTall: cropNumberBoxesTall
+      squaresTall: cropNumberBoxesTall,
     };
     onConfirm(previewImage, photoInfo);
-  } 
+  };
 
   return (
     <ConfirmationDialog
@@ -73,18 +84,23 @@ const CropModal = ({
       <CanvasWrapper
         imageToCrop={imageToCrop}
         aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}
-        setPreviewImage={setPreviewImage}
-        setClipPathInfo={setClipPathInfo}
+        startingClipPathInfo={null}
+        setPreviewImage={(image, clipPathInfo) => {
+          setPreviewImage(image);
+          setClipPathInfo(clipPathInfo);
+        }}
       ></CanvasWrapper>
       <div className={styles.dateContainer}>
-        <DateSquarePreview
-          dateNumber={dateNumber}
-          yearMonthInfo={yearMonthInfo}
-          previewImage={previewImage}
-          boundingBox={boundingBox}
-          cropNumberBoxesTall={cropNumberBoxesTall}
-          cropNumberBoxesWide={cropNumberBoxesWide}
-        ></DateSquarePreview>
+        <DateSquare dateNumber={dateNumber} yearMonthInfo={yearMonthInfo}>
+          <DateSquarePreview
+            dateNumber={dateNumber}
+            yearMonthInfo={yearMonthInfo}
+            previewImage={previewImage}
+            boundingBox={boundingBox}
+            cropNumberBoxesTall={cropNumberBoxesTall}
+            cropNumberBoxesWide={cropNumberBoxesWide}
+          ></DateSquarePreview>
+        </DateSquare>
         <DropdownSelect<BoundingBoxValue>
           title="Bounding box"
           defaultValue={"writable-space"}
@@ -141,19 +157,28 @@ const CropModal = ({
 type WrapperProps = {
   imageToCrop: HTMLImageElement | null;
   aspectRatio: number;
-  setPreviewImage: (image: HTMLImageElement) => void;
-  setClipPathInfo: (ClipPathInfo: ClipPathInfo) => void;
+  startingClipPathInfo: ClipPathInfo | null;
+  setPreviewImage: (
+    image: HTMLImageElement,
+    clipPathInfo: ClipPathInfo
+  ) => void;
 };
 
 function CanvasWrapper({
   imageToCrop,
   aspectRatio,
+  startingClipPathInfo,
   setPreviewImage,
-  setClipPathInfo
 }: React.PropsWithRef<WrapperProps>) {
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = React.useState<Canvas | null>(null);
-  useCropPhoto(fabricCanvas, imageToCrop, aspectRatio, setPreviewImage, setClipPathInfo);
+  useCropPhoto(
+    fabricCanvas,
+    imageToCrop,
+    aspectRatio,
+    setPreviewImage,
+    startingClipPathInfo
+  );
   React.useEffect(() => {
     if (!htmlCanvas.current) {
       return;

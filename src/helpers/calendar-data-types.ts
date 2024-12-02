@@ -15,14 +15,15 @@ export type RawImageData = {
   width: number;
 }
 
-export type ResizedImage = {
-  fromFullImageId: string;
-  imageData: RawImageData;
-};
-
 export type BoundingBoxValue = "square" | "writable-space";
 
 export type FullCroppedPhotoInfo = {
+  fullImage: HTMLImageElement,
+  croppedImage: HTMLImageElement,
+  metadata: CroppedPhotoMetadata
+}
+
+export type CroppedPhotoMetadata = {
   clipPathInfo: ClipPathInfo
   boundingBox: BoundingBoxValue;
   squaresWide: number;

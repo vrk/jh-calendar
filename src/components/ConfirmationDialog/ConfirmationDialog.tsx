@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import styles from './ConfirmationDialog.module.css';
-import { ClipPathInfo, FullCroppedPhotoInfo } from "@/helpers/calendar-data-types";
+import { ClipPathInfo, CroppedPhotoMetadata } from "@/helpers/calendar-data-types";
 
 type Props = {
   isOpen: boolean;

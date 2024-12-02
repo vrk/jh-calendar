@@ -1,6 +1,10 @@
 import * as React from "react";
 import { add, format } from "date-fns";
-import { BoundingBoxValue, YearMonthInfo } from "@/helpers/calendar-data-types";
+import {
+  BoundingBoxValue,
+  FullCroppedPhotoInfo,
+  YearMonthInfo,
+} from "@/helpers/calendar-data-types";
 import { getWeekNumber, getYearMonthInfo } from "@/helpers/calendar-helpers";
 import DayAddPhotoButton from "@/components/DayAddPhotoButton";
 import style from "./hobonichi-generator.module.css";
@@ -336,7 +340,10 @@ export function DateSquarePreview({
     imageContainerRoot.current.style.width = `${
       maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
     }px`;
-    const maxBoxesTall = boundingBox === "square" ? maxBounds.totalBoxesTallWholeSquare : maxBounds.totalBoxesTallWritable;
+    const maxBoxesTall =
+      boundingBox === "square"
+        ? maxBounds.totalBoxesTallWholeSquare
+        : maxBounds.totalBoxesTallWritable;
     imageContainerRoot.current.style.height = `${
       maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
     }px`;
@@ -363,14 +370,12 @@ export function DateSquarePreview({
     cropNumberBoxesWide,
   ]);
   return (
-    <DateSquare dateNumber={dateNumber} yearMonthInfo={yearMonthInfo}>
-      <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
-        <div
-          ref={imageContainerRoot}
-          className={`${style.photoPreviewContainer} ${boundingClass}`}
-        ></div>
-      </foreignObject>
-    </DateSquare>
+    <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
+      <div
+        ref={imageContainerRoot}
+        className={`${style.photoPreviewContainer} ${boundingClass}`}
+      ></div>
+    </foreignObject>
   );
 }
 
@@ -631,12 +636,14 @@ function getDateInfo(
 type ClickableDateProps = {
   dayInMonth: number;
   yearMonthInfo: YearMonthInfo;
+  fullCroppedPhotoInfo: FullCroppedPhotoInfo | null;
   onClick: () => void;
 };
 
 export function HobonichiCousinClickableDate({
   dayInMonth,
   yearMonthInfo,
+  fullCroppedPhotoInfo,
   onClick,
 }: ClickableDateProps) {
   const itemWidth = 80;
@@ -679,15 +686,32 @@ export function HobonichiCousinClickableDate({
     NUMBER_PIXELS_PER_MARGIN * 2 +
     heightDelta / 2;
 
-  return (
-    <DayAddPhotoButton
-      x={x}
-      y={y}
-      width={itemWidth}
-      height={itemHeight}
-      onClick={onClick}
-    ></DayAddPhotoButton>
-  );
+  if (!fullCroppedPhotoInfo) {
+    return (
+      <DayAddPhotoButton
+        x={x}
+        y={y}
+        width={itemWidth}
+        height={itemHeight}
+        onClick={onClick}
+      ></DayAddPhotoButton>
+    );
+  } else {
+    const newX = margin + todaysDay * NUMBER_PIXELS_PER_DAY;
+    const newY = weekNumber * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN * 2;
+    return (
+      <svg x={newX} y={newY} height={heightOfMyBox} width={NUMBER_PIXELS_PER_DAY}>
+        <DateSquarePreview
+          dateNumber={dayInMonth}
+          yearMonthInfo={yearMonthInfo}
+          previewImage={fullCroppedPhotoInfo.croppedImage}
+          boundingBox={fullCroppedPhotoInfo.metadata.boundingBox}
+          cropNumberBoxesWide={fullCroppedPhotoInfo.metadata.squaresWide}
+          cropNumberBoxesTall={fullCroppedPhotoInfo.metadata.squaresTall}
+        ></DateSquarePreview>
+      </svg>
+    );
+  }
 }
 
 function Line({ path }: { path: string }) {

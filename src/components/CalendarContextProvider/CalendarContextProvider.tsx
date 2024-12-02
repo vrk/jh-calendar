@@ -1,9 +1,9 @@
 "use client";
 import {
   ClipPathInfo,
+  CroppedPhotoMetadata,
   FullCroppedPhotoInfo,
   FullImage,
-  ResizedImage,
   ValidDate,
   YearMonthInfo,
 } from "@/helpers/calendar-data-types";
@@ -12,16 +12,11 @@ import { loadYearMonthInfo, saveYearMonthInfo } from "@/helpers/indexeddb";
 import React from "react";
 
 type CalendarFunctions = {
-  addFullImage: (data: string) => void;
-  removeFullImage: (id: string) => void;
-
   setPhotoForDate: (
-    date: ValidDate,
-    fullImageId: string,
-    clipPathInfo: ClipPathInfo,
-    fullCroppedImageData: ImageData
+      date: ValidDate,
+      photoInfo: FullCroppedPhotoInfo
   ) => void;
-  getCroppedPhotoInfoForDate: (date: ValidDate) => FullCroppedPhotoInfo | null;
+  getCroppedPhotoInfoForDate: (date: ValidDate) => CroppedPhotoMetadata | null;
   removePhotoForDate: (date: ValidDate) => void;
 
   setYearMonth: (yearMonth: string) => void;
@@ -32,8 +27,7 @@ type CalendarFunctions = {
 type CalendarContextProvider = {
   loadedStatus: LoadedStatus;
   yearMonthInfo: YearMonthInfo;
-  thumbnailsOfFullImages: Map<string, ImageData>;
-  croppedDateImages: Map<ValidDate, ResizedImage>;
+  croppedDateImages: Map<ValidDate, HTMLImageElement>;
 
   calendarFunctions: CalendarFunctions;
 };
@@ -47,26 +41,12 @@ export enum LoadedStatus {
 export const CalendarContext = React.createContext<CalendarContextProvider>({
   loadedStatus: LoadedStatus.Uninitialized,
   yearMonthInfo: getTodaysYearMonthInfo(),
-  thumbnailsOfFullImages: new Map<string, ImageData>(),
-  croppedDateImages: new Map<ValidDate, ResizedImage>(),
+  croppedDateImages: new Map<ValidDate, HTMLImageElement>(),
   calendarFunctions: {
-    addFullImage: function (data: string): void {
+    setPhotoForDate: function (date: ValidDate, photoInfo: FullCroppedPhotoInfo): void {
       throw new Error("Function not implemented.");
     },
-    removeFullImage: function (id: string): void {
-      throw new Error("Function not implemented.");
-    },
-    setPhotoForDate: function (
-      date: ValidDate,
-      fullImageId: string,
-      clipPathInfo: ClipPathInfo,
-      fullCroppedImageData: ImageData
-    ): void {
-      throw new Error("Function not implemented.");
-    },
-    getCroppedPhotoInfoForDate: function (
-      date: ValidDate
-    ): FullCroppedPhotoInfo | null {
+    getCroppedPhotoInfoForDate: function (date: ValidDate): CroppedPhotoMetadata | null {
       throw new Error("Function not implemented.");
     },
     removePhotoForDate: function (date: ValidDate): void {
@@ -77,7 +57,7 @@ export const CalendarContext = React.createContext<CalendarContextProvider>({
     },
     clearCalendar: function (): void {
       throw new Error("Function not implemented.");
-    },
+    }
   },
 });
 
@@ -89,35 +69,24 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
   const [yearMonthInfo, setYearMonthInfoState] = React.useState(
     loadedInfo ? loadedInfo : getTodaysYearMonthInfo()
   );
-  const [thumbnailsOfFullImages, setThumbnailsOfFullImages] = React.useState(
-    new Map<string, ImageData>()
-  );
 
   const [croppedDateImages, setCroppedDateImages] = React.useState(
-    new Map<ValidDate, ResizedImage>()
+    new Map<ValidDate, HTMLImageElement>()
   );
 
   console.log('creating new map');
-  const loadedImagesCache = new Map<string, ImageData>();
 
   const calendarFunctions: CalendarFunctions = {
-    addFullImage: function (data: string): void {
-      throw new Error("Function not implemented.");
-    },
-    removeFullImage: function (id: string): void {
-      throw new Error("Function not implemented.");
-    },
     setPhotoForDate: function (
       date: ValidDate,
-      fullImageId: string,
-      clipPathInfo: ClipPathInfo,
-      fullCroppedImageData: ImageData
+      fullCroppedPhotoInfo: FullCroppedPhotoInfo
     ): void {
-      throw new Error("Function not implemented.");
+      const newMap = new Map(croppedDateImages).set(date, fullCroppedPhotoInfo.croppedImage);
+      setCroppedDateImages(newMap);
     },
     getCroppedPhotoInfoForDate: function (
       date: ValidDate
-    ): FullCroppedPhotoInfo | null {
+    ): CroppedPhotoMetadata | null {
       throw new Error("Function not implemented.");
     },
     removePhotoForDate: function (date: ValidDate): void {
@@ -147,7 +116,6 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
       value={{
         loadedStatus,
         yearMonthInfo,
-        thumbnailsOfFullImages,
         croppedDateImages,
         calendarFunctions,
       }}

@@ -13,16 +13,21 @@ import {
   getImageFromFile,
   PhotoSelectionType,
 } from "@/helpers/file-input";
+import { FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
 
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
-  const { yearMonthInfo } = React.useContext(CalendarContext);
+  const { yearMonthInfo, calendarFunctions } = React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
   const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
   const [imageToCrop, setImageToCrop] = React.useState<HTMLImageElement|null>(null);
   const [selectedDayNumber, setSelectedDayNumber] = React.useState<number|null>(null);
+
+  const loadedImagesCache = React.useMemo(() => {
+    return new Map<number, FullCroppedPhotoInfo>()
+  }, []);
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -66,7 +71,18 @@ function CalendarView() {
         isOpen={isCropDialogOpen}
         dateNumber={selectedDayNumber}
         yearMonthInfo={yearMonthInfo}
-        onConfirm={() => {}}
+        onConfirm={(croppedImage, croppedpHotoMetadata) => {
+          if (!selectedDayNumber || !imageToCrop) {
+            return;
+          }
+          const fullCroppedPhotoInfo: FullCroppedPhotoInfo = {
+            fullImage: imageToCrop,
+            croppedImage: croppedImage,
+            metadata: croppedpHotoMetadata
+          }
+          calendarFunctions.setPhotoForDate(selectedDayNumber as ValidDate, fullCroppedPhotoInfo)
+          loadedImagesCache.set(selectedDayNumber, fullCroppedPhotoInfo);
+        }}
         onOpenChange={(isOpen) => {
           setIsCropDialogOpen(isOpen);
           if (!isOpen) {
@@ -83,6 +99,7 @@ function CalendarView() {
               key={dayInMonth}
               dayInMonth={dayInMonth}
               yearMonthInfo={yearMonthInfo}
+              fullCroppedPhotoInfo={loadedImagesCache.get(dayInMonth) || null}
               onClick={() => {
                 getFileForDay(dayInMonth);
               }}

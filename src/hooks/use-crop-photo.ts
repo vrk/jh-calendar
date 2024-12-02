@@ -16,14 +16,9 @@ function useCropPhoto(
   fabricCanvas: Canvas | null,
   imageToCrop: HTMLImageElement | null,
   aspectRatio: number,
-  setCroppedImage: (img: HTMLImageElement) => void
+  setCroppedImage: (img: HTMLImageElement, clipaPathInfo: ClipPathInfo) => void,
+  startingClipPathInfo: ClipPathInfo | null,
 ) {
-  const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo>({
-    top: 0,
-    left: 0,
-    height: 0,
-    width: 0,
-  });
   const rectangle = new Rect({
     fill: "transparent",
     strokeUniform: true,
@@ -37,10 +32,10 @@ function useCropPhoto(
     lockSkewingY: true,
     transparentCorners: false,
     visible: true,
-    height: clipPathInfo.height,
-    width: clipPathInfo.width,
-    top: clipPathInfo.top,
-    left: clipPathInfo.left,
+    height: startingClipPathInfo?.height,
+    width: startingClipPathInfo?.width,
+    top: startingClipPathInfo?.top,
+    left: startingClipPathInfo?.left,
   });
   rectangle.controls.mt.setVisibility(false, "", rectangle);
   rectangle.controls.ml.setVisibility(false, "", rectangle);
@@ -63,8 +58,8 @@ function useCropPhoto(
     const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
     rectangle.width = cropRectStartingWidth;
     rectangle.height = cropRectStartingHeight;
-
     clampSizeToBounds(fabricImage, rectangle);
+
     fabricCanvas.add(rectangle);
     fabricCanvas.centerObject(rectangle);
     fabricCanvas.setActiveObject(rectangle);
@@ -87,7 +82,13 @@ function useCropPhoto(
       };
       const dataUrl = fabricCanvas.toDataURL(options);
       const img = await createImageElementWithSrc(dataUrl);
-      setCroppedImage(img);
+
+      setCroppedImage(img, {
+        top: rectangle.top,
+        left: rectangle.left,
+        height: rectangle.getScaledHeight(),
+        width: rectangle.getScaledWidth()
+      });
     };
     updateCroppedImageData();
 

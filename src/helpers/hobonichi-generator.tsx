@@ -337,7 +337,6 @@ export function DateSquarePreview({
     imageContainerRoot.current.style.width = `${
       maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
     }px`;
-    debugger;
     const maxBoxesTall = boundingBox === "square" ? maxBounds.totalBoxesTallWholeSquare : maxBounds.totalBoxesTallWritable;
     imageContainerRoot.current.style.height = `${
       maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX

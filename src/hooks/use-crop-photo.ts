@@ -77,6 +77,9 @@ function useCropPhoto(
         left: rectangle.left,
         top: rectangle.top,
         multiplier: 1,
+        filter: (object: any) => {
+          return object !== rectangle;
+        }
       };
       const dataUrl = fabricCanvas.toDataURL(options);
       const img = await createImageElementWithSrc(dataUrl);

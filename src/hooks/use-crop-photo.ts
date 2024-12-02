@@ -51,6 +51,7 @@ function useCropPhoto(
       transparentCorners: false,
       visible: true,
     });
+    clampSizeToBounds(fabricImage, rectangle);
     rectangle.controls.mt.setVisibility(false, "", rectangle);
     rectangle.controls.ml.setVisibility(false, "", rectangle);
     rectangle.controls.mb.setVisibility(false, "", rectangle);
@@ -60,13 +61,7 @@ function useCropPhoto(
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
-    const onObjectModified = async (e: any) => {
-      if (e.target !== rectangle) {
-        return;
-      }
-      clampSizeToBounds(fabricImage, rectangle);
-      clampLocationToBounds(fabricImage, rectangle);
-
+    const updateCroppedImageData = async () => {
       const format: ImageFormat = "png";
       const options = {
         name: "New Image",
@@ -84,7 +79,16 @@ function useCropPhoto(
       const dataUrl = fabricCanvas.toDataURL(options);
       const img = await createImageElementWithSrc(dataUrl);
       setCroppedImage(img);
+    }
+    updateCroppedImageData();
 
+    const onObjectModified = async (e: any) => {
+      if (e.target !== rectangle) {
+        return;
+      }
+      clampSizeToBounds(fabricImage, rectangle);
+      clampLocationToBounds(fabricImage, rectangle);
+      await updateCroppedImageData();
       fabricCanvas.requestRenderAll();
     };
 

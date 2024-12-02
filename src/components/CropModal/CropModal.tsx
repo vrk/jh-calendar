@@ -110,8 +110,8 @@ const CropModal = ({
             min={2}
             max={
               boundingBox === "square"
-                ? bounds.totalBoxesTallWritable
-                : bounds.totalBoxesTallWholeSquare
+                ? bounds.totalBoxesTallWholeSquare
+                : bounds.totalBoxesTallWritable
             }
             value={cropNumberBoxesTall}
             onChange={(e) => {

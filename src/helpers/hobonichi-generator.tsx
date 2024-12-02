@@ -3,6 +3,7 @@ import { add, format } from "date-fns";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
 import { getWeekNumber, getYearMonthInfo } from "@/helpers/calendar-helpers";
 import DayAddPhotoButton from "@/components/DayAddPhotoButton";
+import style from "./hobonichi-generator.module.css";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -116,30 +117,19 @@ function createGridsForBox(
   numberBoxesTall: number
 ) {
   const group = createSvgElement("g");
-  for (
-    let y = 0;
-    y <= numberBoxesTall;
-    y++
-  ) {
+  for (let y = 0; y <= numberBoxesTall; y++) {
     const x1 = startingX;
     const y1 = startingY + y * NUMBER_PIXELS_PER_GRID_BOX;
-    const x2 =
-      startingX +
-      numberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
+    const x2 = startingX + numberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
     const y2 = y1;
     const line = createLine(x1, y1, x2, y2);
     group.append(line);
   }
-  for (
-    let x = 0;
-    x <= numberBoxesWide;
-    x++
-  ) {
+  for (let x = 0; x <= numberBoxesWide; x++) {
     const x1 = startingX + x * NUMBER_PIXELS_PER_GRID_BOX;
     const y1 = startingY;
     const x2 = x1;
-    const y2 =
-      startingY + numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+    const y2 = startingY + numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
     const line = createLine(x1, y1, x2, y2);
     group.append(line);
   }
@@ -250,6 +240,7 @@ type DateSquareProps = {
 export function DateSquare({
   dateNumber,
   yearMonthInfo,
+  children,
 }: React.PropsWithChildren<DateSquareProps>) {
   const svgRoot = React.useRef<SVGSVGElement>(null);
   React.useEffect(() => {
@@ -274,7 +265,6 @@ export function DateSquare({
     svgRoot.current.setAttribute("width", `${graphicHeight}`);
 
     const grid = createGridsForBox(0, 0, NUMBER_BOXES_PER_DAY, numberBoxesTall);
-    svgRoot.current.append(grid);
     const dateInfo = {
       dateNumber,
       isInMonth: true,
@@ -285,7 +275,8 @@ export function DateSquare({
         ? createSixthRowDateSquare(0, 0, dateInfo)
         : createDateSquare(0, 0, dateInfo);
     staticContents.id = `date-square-for-${dateNumber}`;
-    svgRoot.current.append(staticContents);
+    svgRoot.current.prepend(staticContents);
+    svgRoot.current.prepend(grid);
 
     return () => {
       if (!svgRoot.current) {
@@ -295,7 +286,36 @@ export function DateSquare({
       added?.remove();
     };
   }, [svgRoot, dateNumber, yearMonthInfo]);
-  return <svg ref={svgRoot}></svg>;
+  return <svg ref={svgRoot}>{children}</svg>;
+}
+
+type DateSquarePreviewProps = {
+  dateNumber: number | null;
+  yearMonthInfo: YearMonthInfo;
+  previewImage: HTMLImageElement | null
+};
+export function DateSquarePreview({
+  dateNumber,
+  yearMonthInfo,
+  previewImage
+}: DateSquarePreviewProps) {
+  const imageContainerRoot = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!imageContainerRoot.current || !previewImage) {
+      return;
+    }
+    imageContainerRoot.current.append(previewImage);
+  }, [imageContainerRoot, previewImage]);
+  return (
+    <DateSquare
+      dateNumber={dateNumber}
+      yearMonthInfo={yearMonthInfo}
+    >
+      <foreignObject className={style.foreignObject}>
+        <div ref={imageContainerRoot} className={style.photoPreviewContainer}></div>
+      </foreignObject>
+    </DateSquare>
+  );
 }
 
 function createSixthRowDateSquare(

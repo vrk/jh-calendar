@@ -3,7 +3,7 @@ import styles from "./CropModal.module.css";
 import { Canvas } from "fabric";
 import useCropPhoto from "@/hooks/use-crop-photo";
 import ConfirmationDialog from "../ConfirmationDialog";
-import { DateSquare } from "@/helpers/hobonichi-generator";
+import { DateSquare, DateSquarePreview } from "@/helpers/hobonichi-generator";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
 
 type Props = {
@@ -35,10 +35,11 @@ const CropModal = ({
     >
       <CanvasWrapper imageToCrop={imageToCrop}></CanvasWrapper>
       <div className={styles.dateContainer}>
-        <DateSquare
+        <DateSquarePreview
           dateNumber={dateNumber}
           yearMonthInfo={yearMonthInfo}
-        ></DateSquare>
+          previewImage={imageToCrop}
+        ></DateSquarePreview>
       </div>
     </ConfirmationDialog>
   );

@@ -19,7 +19,7 @@ const STATIC_CONTENT_ID = "static-conten";
 function CalendarView() {
   const { yearMonthInfo } = React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
-  const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
+  const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(true);
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -46,13 +46,13 @@ function CalendarView() {
   }
 
   const getFileForDay = async (dayInMonth: number) => {
-    const files = await getFileFromFilePicker(PhotoSelectionType.Single);
-    if (!files || files.length === 0) {
-      return;
-    }
-    const file = files[0];
-    const rawImageData = await getRawImageDataFromFile(file);
     setIsCropDialogOpen(true);
+    // const files = await getFileFromFilePicker(PhotoSelectionType.Single);
+    // if (!files || files.length === 0) {
+    //   return;
+    // }
+    // const file = files[0];
+    // const rawImageData = await getRawImageDataFromFile(file);
   };
   return (
     <div className={style.container}>

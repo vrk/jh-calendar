@@ -1,6 +1,9 @@
-import * as React from 'react';
-import styles from './CropModal.module.css';
+import * as React from "react";
+import styles from "./CropModal.module.css";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import Image from "next/image";
+import hobonichiCousinimage from "@/components/JournalCanvas/images/hobonichi-cousin-spread.png";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 type Props = {
   isOpen: boolean;
@@ -13,27 +16,20 @@ const CropModal = ({
   onConfirm,
   onOpenChange,
 }: React.PropsWithChildren<Props>) => (
-  <AlertDialog.Root open={isOpen} onOpenChange={onOpenChange}>
-    <AlertDialog.Portal>
-      <AlertDialog.Overlay className={styles.AlertDialogOverlay} />
-      <AlertDialog.Content className={styles.AlertDialogContent}>
-        <AlertDialog.Title className={styles.AlertDialogTitle}>
-          title
-        </AlertDialog.Title>
-        <AlertDialog.Description className={styles.AlertDialogDescription}>
-          description
-        </AlertDialog.Description>
-        <div style={{ display: "flex", gap: 25, justifyContent: "flex-end" }}>
-          <AlertDialog.Cancel asChild>
-            <button className={`${styles.Button} ${styles.mauve}`}>Cancel</button>
-          </AlertDialog.Cancel>
-          <AlertDialog.Action asChild>
-            <button className={`${styles.Button} ${styles.red}`} onClick={onConfirm}>Confirm</button>
-          </AlertDialog.Action>
-        </div>
-      </AlertDialog.Content>
-    </AlertDialog.Portal>
-  </AlertDialog.Root>
+  <ConfirmationDialog
+    className={styles.dialog}
+    isOpen={isOpen}
+    onConfirm={onConfirm}
+    onOpenChange={onOpenChange}
+    title="Crop image"
+    confirm="Crop"
+    cancel="Cancel"
+  >
+    <div className={styles.container}>
+      <div className={styles.canvas}></div>
+      <div className={styles.controls}></div>
+    </div>
+  </ConfirmationDialog>
 );
 
 export default CropModal;

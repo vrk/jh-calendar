@@ -15,9 +15,8 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 90vw;
-	max-width: 500px;
-	max-height: 85vh;
+	display: flex;
+	flex-direction: column;
 	padding: 25px;
 	animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -37,6 +36,9 @@
 	color: var(--mauve-11);
 	font-size: 15px;
 	line-height: 1.5;
+	flex-grow: 1;
+	height: 600px;
+	max-height: 80vh;
 }
 
 .Button {

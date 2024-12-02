@@ -44,74 +44,64 @@ function useCropPhoto(
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
-    fabricCanvas.on("object:scaling", (e: any) =>{
+    const onScaleMove = (e: any) => {
+      if (e.target !== rectangle) {
+        return;
+      }
       const maxWidth = fabricImage.getScaledWidth();
       const maxHeight = fabricImage.getScaledHeight();
-      const topOffset = fabricImage.top;
-      const leftOffset = fabricImage.left;
-      var obj = e.target as Rect;
-        console.log(obj.height, obj.getScaledHeight());
-      if (obj.getScaledHeight() > maxHeight) {
-        const maxScaleRatio = maxHeight / obj.height; 
-        obj.scaleY = maxScaleRatio;
+      if (rectangle.getScaledHeight() > maxHeight) {
+        const maxScaleRatio = maxHeight / rectangle.height;
+        rectangle.scaleY = maxScaleRatio;
       }
-      if (obj.getScaledWidth() > maxWidth) {
-        const maxScaleRatio = maxWidth / obj.width 
-        obj.scaleX = maxScaleRatio;
+      if (rectangle.getScaledWidth() > maxWidth) {
+        const maxScaleRatio = maxWidth / rectangle.width;
+        rectangle.scaleX = maxScaleRatio;
       }
-      // top-left  corner
-      if (obj.top < topOffset) {
-        // maintain same size
-        obj.top = topOffset;
-      }
-      if (obj.left < leftOffset) {
-        obj.left = leftOffset;
-      }
-      // Bottom right corner
-      const objBottom = obj.top + obj.getScaledHeight();
-      if (objBottom > maxHeight + topOffset) {
-        obj.top = topOffset + (maxHeight - obj.getScaledHeight());
-      }
-      const objRight = obj.left + obj.getScaledWidth();
-      if (objRight > maxWidth + leftOffset) {
-        obj.left = leftOffset + (maxWidth - obj.getScaledWidth());
-      }
+      clampToBounds(fabricImage, rectangle);
+    };
 
-
-
-    })
-    fabricCanvas.on("object:moving", (e: any) => {
-      const maxWidth = fabricImage.getScaledWidth();
-      const maxHeight = fabricImage.getScaledHeight();
-      const topOffset = fabricImage.top;
-      const leftOffset = fabricImage.left;
-      var obj = e.target as Rect;
-      // top-left  corner
-      if (obj.top < topOffset) {
-        obj.top = topOffset;
+    fabricCanvas.on("object:scaling", onScaleMove);
+    const onMove = (e: any) => {
+      if (e.target !== rectangle) {
+        return;
       }
-      if (obj.left < leftOffset) {
-        obj.left = leftOffset;
-      }
-      // Bottom right corner
-      const objBottom = obj.top + obj.getScaledHeight();
-      if (objBottom > maxHeight + topOffset) {
-        obj.top = topOffset + (maxHeight - obj.getScaledHeight());
-      }
-      const objRight = obj.left + obj.getScaledWidth();
-      if (objRight > maxWidth + leftOffset) {
-        obj.left = leftOffset + (maxWidth - obj.getScaledWidth());
-      }
-
-      obj.setCoords();
-      fabricCanvas.requestRenderAll();
-    });
+      clampToBounds(fabricImage, rectangle);
+    };
+    fabricCanvas.on("object:moving", onMove);
 
     return () => {
       fabricCanvas.remove(fabricImage);
       fabricCanvas.remove(rectangle);
+      fabricCanvas.off("object:moving", onMove);
+      fabricCanvas.off("object:scaling", onScaleMove);
     };
   }, [fabricCanvas, imageToCrop]);
+}
+
+function clampToBounds(bounds: FabricImage, movingObject: FabricObject) {
+  const maxWidth = bounds.getScaledWidth();
+  const maxHeight = bounds.getScaledHeight();
+  const topOffset = bounds.top;
+  const leftOffset = bounds.left;
+  // top-left  corner
+  if (movingObject.top < topOffset) {
+    movingObject.top = topOffset;
+  }
+  if (movingObject.left < leftOffset) {
+    movingObject.left = leftOffset;
+  }
+  // Bottom right corner
+  const objBottom = movingObject.top + movingObject.getScaledHeight();
+  if (objBottom > maxHeight + topOffset) {
+    movingObject.top = topOffset + (maxHeight - movingObject.getScaledHeight());
+  }
+  const objRight = movingObject.left + movingObject.getScaledWidth();
+  if (objRight > maxWidth + leftOffset) {
+    movingObject.left = leftOffset + (maxWidth - movingObject.getScaledWidth());
+  }
+
+  movingObject.setCoords();
 }
 
 function getClientPosition(e: any) {

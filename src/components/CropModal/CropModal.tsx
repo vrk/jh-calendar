@@ -49,6 +49,7 @@ function CanvasWrapper({imageToCrop}: React.PropsWithRef<WrapperProps>) {
       renderOnAddRemove: false,
       width: htmlCanvas.current.offsetWidth,
       height: htmlCanvas.current.offsetHeight,
+      backgroundColor: "lightgray"
     });
     setFabricCanvas(newlyMadeCanvas);
     return () => {

@@ -18,10 +18,37 @@ function useCropPhoto(
   aspectRatio: number,
   setCroppedImage: (img: HTMLImageElement) => void
 ) {
+  const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo>({
+    top: 0,
+    left: 0,
+    height: 0,
+    width: 0,
+  });
+  const rectangle = new Rect({
+    fill: "transparent",
+    strokeUniform: true,
+    noScaleCache: false,
+    stroke: "black",
+    strokeWidth: 2,
+    cornerStyle: "circle",
+    lockScalingFlip: true,
+    lockRotation: true,
+    lockSkewingX: true,
+    lockSkewingY: true,
+    transparentCorners: false,
+    visible: true,
+    height: clipPathInfo.height,
+    width: clipPathInfo.width,
+    top: clipPathInfo.top,
+    left: clipPathInfo.left,
+  });
+  rectangle.controls.mt.setVisibility(false, "", rectangle);
+  rectangle.controls.ml.setVisibility(false, "", rectangle);
+  rectangle.controls.mb.setVisibility(false, "", rectangle);
+  rectangle.controls.mr.setVisibility(false, "", rectangle);
+
   React.useEffect(() => {
-    console.log("hi hi");
     if (!fabricCanvas || !imageToCrop) {
-      console.log("returning because", fabricCanvas, imageToCrop);
       return;
     }
     const fabricImage = new FabricImage(imageToCrop, {
@@ -34,28 +61,10 @@ function useCropPhoto(
 
     const cropRectStartingWidth = fabricImage.getScaledWidth();
     const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
+    rectangle.width = cropRectStartingWidth;
+    rectangle.height = cropRectStartingHeight;
 
-    const rectangle = new Rect({
-      fill: "transparent",
-      width: cropRectStartingWidth,
-      height: cropRectStartingHeight,
-      strokeUniform: true,
-      noScaleCache: false,
-      stroke: "black",
-      strokeWidth: 2,
-      cornerStyle: "circle",
-      lockScalingFlip: true,
-      lockRotation: true,
-      lockSkewingX: true,
-      lockSkewingY: true,
-      transparentCorners: false,
-      visible: true,
-    });
     clampSizeToBounds(fabricImage, rectangle);
-    rectangle.controls.mt.setVisibility(false, "", rectangle);
-    rectangle.controls.ml.setVisibility(false, "", rectangle);
-    rectangle.controls.mb.setVisibility(false, "", rectangle);
-    rectangle.controls.mr.setVisibility(false, "", rectangle);
     fabricCanvas.add(rectangle);
     fabricCanvas.centerObject(rectangle);
     fabricCanvas.setActiveObject(rectangle);
@@ -74,12 +83,12 @@ function useCropPhoto(
         multiplier: 1,
         filter: (object: any) => {
           return object !== rectangle;
-        }
+        },
       };
       const dataUrl = fabricCanvas.toDataURL(options);
       const img = await createImageElementWithSrc(dataUrl);
       setCroppedImage(img);
-    }
+    };
     updateCroppedImageData();
 
     const onObjectModified = async (e: any) => {

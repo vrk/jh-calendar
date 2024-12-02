@@ -43,35 +43,27 @@ function useCropPhoto(
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
-    fabricCanvas.on("object:modified", function (e: any) {
-      var obj = e.target;
+    fabricCanvas.on("object:modified", (e: any) => {
+      const maxWidth = fabricImage.getScaledWidth();
+      const maxHeight = fabricImage.getScaledHeight();
+      const topOffset = fabricImage.top;
+      const leftOffset = fabricImage.left;
+      var obj = e.target as Rect;
       // top-left  corner
-      if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
-        obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
-        obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
+      if (obj.top < topOffset) {
+        obj.top = topOffset;
       }
-      // bot-right corner
-      if (
-        obj.getBoundingRect().top + obj.getBoundingRect().height >
-          obj.canvas.height ||
-        obj.getBoundingRect().left + obj.getBoundingRect().width >
-          obj.canvas.width
-      ) {
-        obj.top = Math.min(
-          obj.top,
-          obj.canvas.height -
-            obj.getBoundingRect().height +
-            obj.top -
-            obj.getBoundingRect().top
-        );
-        obj.left = Math.min(
-          obj.left,
-          obj.canvas.width -
-            obj.getBoundingRect().width +
-            obj.left -
-            obj.getBoundingRect().left
-        );
+      if (obj.left < leftOffset) {
+        obj.left = leftOffset;
       }
+      // Bottom right corner
+      if (obj.top > maxHeight + topOffset) {
+        obj.top = topOffset + (maxHeight - obj.getScaledHeight());
+      }
+      if (obj.left > maxWidth + leftOffset) {
+        obj.left = leftOffset + (maxWidth - obj.getScaledWidth());
+      }
+
       obj.setCoords();
       fabricCanvas.requestRenderAll();
     });

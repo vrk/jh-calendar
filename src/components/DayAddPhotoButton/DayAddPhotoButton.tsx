@@ -21,9 +21,6 @@ function DayAddPhotoButton({ x, y, width, height, dayInMonth }: Props) {
   };
   return (
     <g>
-      {/* <circle cx={cx} cy={cy} r={itemWidth / 2} fill="lightgreen" stroke="green" strokeWidth={2}></circle>
-      <Line path={path1}></Line>
-      <Line path={path2}></Line> */}
       <foreignObject
         className={style.plusButtonContainer}
         x={x}

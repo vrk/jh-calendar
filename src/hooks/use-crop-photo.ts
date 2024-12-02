@@ -28,15 +28,20 @@ function useCropPhoto(
     fabricImage.scale(scale);
     fabricCanvas.add(fabricImage);
     fabricCanvas.centerObject(fabricImage);
+
+    const cropRectStartingWidth = fabricImage.getScaledWidth();
+    const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
+
     const rectangle = new Rect({
       fill: "transparent",
-      width: 100,
-      height: 100,
+      width: cropRectStartingWidth,
+      height: cropRectStartingHeight,
       strokeUniform: true,
       noScaleCache: false,
       stroke: "black",
       strokeWidth: 2,
       cornerStyle: "circle",
+      lockScalingFlip: true,
       lockRotation: true,
       lockSkewingX: true,
       lockSkewingY: true,
@@ -56,25 +61,18 @@ function useCropPhoto(
       if (e.target !== rectangle) {
         return;
       }
-      const maxWidth = fabricImage.getScaledWidth();
-      const maxHeight = fabricImage.getScaledHeight();
-      if (rectangle.getScaledHeight() > maxHeight) {
-        const maxScaleRatio = maxHeight / rectangle.height;
-        rectangle.scaleY = maxScaleRatio;
-      }
-      if (rectangle.getScaledWidth() > maxWidth) {
-        const maxScaleRatio = maxWidth / rectangle.width;
-        rectangle.scaleX = maxScaleRatio;
-      }
-      clampToBounds(fabricImage, rectangle);
+      clampSizeToBounds(fabricImage, rectangle);
+      clampLocationToBounds(fabricImage, rectangle);
+      fabricCanvas.requestRenderAll();
     };
 
-    fabricCanvas.on("object:scaling", onScaleMove);
+    fabricCanvas.on("object:modified", onScaleMove);
     const onMove = (e: any) => {
       if (e.target !== rectangle) {
         return;
       }
-      clampToBounds(fabricImage, rectangle);
+      clampLocationToBounds(fabricImage, rectangle);
+      fabricCanvas.requestRenderAll();
     };
     fabricCanvas.on("object:moving", onMove);
 
@@ -87,7 +85,28 @@ function useCropPhoto(
   }, [fabricCanvas, imageToCrop, aspectRatio]);
 }
 
-function clampToBounds(bounds: FabricImage, movingObject: FabricObject) {
+function clampSizeToBounds(bounds: FabricImage, movingObject: FabricObject) {
+  const maxWidth = bounds.getScaledWidth();
+  const maxHeight = bounds.getScaledHeight();
+  if (movingObject.getScaledHeight() > maxHeight) {
+    movingObject.scaleToHeight(maxHeight);
+    console.log("scaling height");
+  }
+  if (movingObject.getScaledWidth() > maxWidth) {
+    movingObject.scaleToWidth(maxWidth);
+    console.log(
+      "scaling width",
+      bounds.getScaledWidth(),
+      movingObject.getScaledWidth()
+    );
+  }
+  movingObject.setCoords();
+}
+
+function clampLocationToBounds(
+  bounds: FabricImage,
+  movingObject: FabricObject
+) {
   const maxWidth = bounds.getScaledWidth();
   const maxHeight = bounds.getScaledHeight();
   const topOffset = bounds.top;

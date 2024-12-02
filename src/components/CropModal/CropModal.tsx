@@ -56,7 +56,10 @@ const CropModal = ({
       confirm="Crop"
       cancel="Cancel"
     >
-      <CanvasWrapper imageToCrop={imageToCrop} aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}></CanvasWrapper>
+      <CanvasWrapper
+        imageToCrop={imageToCrop}
+        aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}
+      ></CanvasWrapper>
       <div className={styles.dateContainer}>
         <DateSquarePreview
           dateNumber={dateNumber}
@@ -122,7 +125,10 @@ type WrapperProps = {
   aspectRatio: number;
 };
 
-function CanvasWrapper({ imageToCrop, aspectRatio }: React.PropsWithRef<WrapperProps>) {
+function CanvasWrapper({
+  imageToCrop,
+  aspectRatio,
+}: React.PropsWithRef<WrapperProps>) {
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = React.useState<Canvas | null>(null);
   useCropPhoto(fabricCanvas, imageToCrop, aspectRatio);

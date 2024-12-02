@@ -1,7 +1,10 @@
 import * as React from "react";
 import style from "./CalendarView.module.css";
 import { CalendarContext } from "../CalendarContextProvider/CalendarContextProvider";
-import { createCousinCalendarSvg, ClickableDate } from "@/helpers/hobonichi-generator";
+import {
+  createCousinCalendarSvg,
+  HobonichiCousinClickableDate,
+} from "@/helpers/hobonichi-generator";
 import { getYearMonthString } from "@/helpers/calendar-helpers";
 import { getDaysInMonth } from "date-fns";
 
@@ -15,7 +18,10 @@ function CalendarView() {
     if (!svgRoot.current) {
       return;
     }
-    const staticContents = createCousinCalendarSvg(svgRoot.current, getYearMonthString(yearMonthInfo));
+    const staticContents = createCousinCalendarSvg(
+      svgRoot.current,
+      getYearMonthString(yearMonthInfo)
+    );
     staticContents.id = STATIC_CONTENT_ID;
     svgRoot.current.prepend(staticContents);
     return () => {
@@ -36,10 +42,15 @@ function CalendarView() {
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
           {daysInMonth.map((dayInMonth) => (
-            <ClickableDate key={dayInMonth} dayInMonth={dayInMonth} yearMonthInfo={yearMonthInfo}></ClickableDate>
+            <HobonichiCousinClickableDate
+              key={dayInMonth}
+              dayInMonth={dayInMonth}
+              yearMonthInfo={yearMonthInfo}
+            ></HobonichiCousinClickableDate>
           ))}
         </svg>
-      </div>;
+      </div>
+      ;
     </div>
   );
 }

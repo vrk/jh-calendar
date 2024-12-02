@@ -6,10 +6,10 @@ export type YearMonthInfo = {
 
 export type FullImage = {
   id: string;
-  imageData: ImageData;
+  imageData: RawImageData;
 };
 
-export type ImageData = {
+export type RawImageData = {
   data: string;
   height: number;
   width: number;
@@ -17,7 +17,7 @@ export type ImageData = {
 
 export type ResizedImage = {
   fromFullImageId: string;
-  imageData: ImageData;
+  imageData: RawImageData;
 };
 
 export type FullCroppedPhotoInfo = {

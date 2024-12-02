@@ -1,7 +1,7 @@
 import { add, format } from "date-fns";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
 import { getYearMonthInfo } from "@/helpers/calendar-helpers";
-import style from "./hobonichi-generator.module.css";
+import DayAddPhotoButton from "@/components/DayAddPhotoButton";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -464,7 +464,7 @@ type ClickableDateProps = {
   yearMonthInfo: YearMonthInfo;
 };
 
-export function ClickableDate({
+export function HobonichiCousinClickableDate({
   dayInMonth,
   yearMonthInfo,
 }: ClickableDateProps) {
@@ -507,25 +507,15 @@ export function ClickableDate({
     weekNumber * NUMBER_PIXELS_PER_DAY +
     NUMBER_PIXELS_PER_MARGIN * 2 +
     heightDelta / 2;
-    
+
   return (
-    <g>
-      {/* <circle cx={cx} cy={cy} r={itemWidth / 2} fill="lightgreen" stroke="green" strokeWidth={2}></circle>
-      <Line path={path1}></Line>
-      <Line path={path2}></Line> */}
-      <foreignObject
-        className={style.plusButtonContainer}
-        x={x}
-        y={y}
-        width={itemWidth}
-        height={itemHeight}
-      >
-        <div className={style.plusButton}>
-          <span className={style.plus}>+</span>{" "}
-          <span className={style.add}>Photo</span>
-        </div>
-      </foreignObject>
-    </g>
+    <DayAddPhotoButton
+      x={x}
+      y={y}
+      width={itemWidth}
+      height={itemHeight}
+      dayInMonth={dayInMonth}
+    ></DayAddPhotoButton>
   );
 }
 

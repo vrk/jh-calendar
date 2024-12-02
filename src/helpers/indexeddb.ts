@@ -23,7 +23,6 @@ const THUMBNAIL_IMAGE_STORE_NAME = "ThumbnailFullImage";
 const CROPPED_PHOTO_STORE_NAME = "CroppedDatePhoto";
 const PRINTABLE_CROPPED_PHOTO_STORE_NAME = "PrintableCroppedDatePhoto";
 
-const THUMBNAIL_TO_FULL_INDEX_NAME = "ThumbToFull";
 const CROPPED_TO_FULL_INDEX_NAME = "CroppedToFull";
 const PRINTABLE_TO_FULL_INDEX_NAME = "PrintableToFull";
 
@@ -66,22 +65,19 @@ export async function getDatabase(): Promise<IDBDatabase> {
 
       db.createObjectStore(FULL_IMAGE_STORE_NAME, { keyPath: "id" });
 
-      const thumbStore = db.createObjectStore(THUMBNAIL_IMAGE_STORE_NAME, {
-        keyPath: "id",
-      });
-      thumbStore.createIndex(THUMBNAIL_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
-        unique: false,
+      db.createObjectStore(THUMBNAIL_IMAGE_STORE_NAME, {
+        keyPath: "fromFullImageId",
       });
 
       const croppedStore = db.createObjectStore(CROPPED_PHOTO_STORE_NAME, {
-        keyPath: "id",
+        keyPath: "dayOfMonth",
       });
       croppedStore.createIndex(CROPPED_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
         unique: false,
       });
 
       const printableStore = db.createObjectStore(PRINTABLE_CROPPED_PHOTO_STORE_NAME, {
-        keyPath: "id",
+        keyPath: "dayOfMonth",
       });
       printableStore.createIndex(PRINTABLE_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
         unique: false,

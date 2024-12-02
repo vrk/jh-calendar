@@ -57,10 +57,12 @@ function useCropPhoto(
         obj.left = leftOffset;
       }
       // Bottom right corner
-      if (obj.top > maxHeight + topOffset) {
+      const objBottom = obj.top + obj.getScaledHeight();
+      if (objBottom > maxHeight + topOffset) {
         obj.top = topOffset + (maxHeight - obj.getScaledHeight());
       }
-      if (obj.left > maxWidth + leftOffset) {
+      const objRight = obj.left + obj.getScaledWidth();
+      if (objRight > maxWidth + leftOffset) {
         obj.left = leftOffset + (maxWidth - obj.getScaledWidth());
       }
 

@@ -7,12 +7,19 @@ import {
 } from "@/helpers/hobonichi-generator";
 import { getYearMonthString } from "@/helpers/calendar-helpers";
 import { getDaysInMonth } from "date-fns";
+import CropModal from "../CropModal";
+import {
+  getFileFromFilePicker as getFileFromFilePicker,
+  getRawImageDataFromFile,
+  PhotoSelectionType,
+} from "@/helpers/file-input";
 
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
   const { yearMonthInfo } = React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
+  const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -37,8 +44,25 @@ function CalendarView() {
   for (let i = 1; i <= numberDaysInMonth; i++) {
     daysInMonth.push(i);
   }
+
+  const getFileForDay = async (dayInMonth: number) => {
+    const files = await getFileFromFilePicker(PhotoSelectionType.Single);
+    if (!files || files.length === 0) {
+      return;
+    }
+    const file = files[0];
+    const rawImageData = await getRawImageDataFromFile(file);
+    setIsCropDialogOpen(true);
+  };
   return (
     <div className={style.container}>
+      <CropModal
+        isOpen={isCropDialogOpen}
+        onConfirm={() => {}}
+        onOpenChange={(isOpen) => {
+          setIsCropDialogOpen(isOpen);
+        }}
+      ></CropModal>
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
           {daysInMonth.map((dayInMonth) => (
@@ -46,11 +70,13 @@ function CalendarView() {
               key={dayInMonth}
               dayInMonth={dayInMonth}
               yearMonthInfo={yearMonthInfo}
+              onClick={() => {
+                getFileForDay(dayInMonth);
+              }}
             ></HobonichiCousinClickableDate>
           ))}
         </svg>
       </div>
-      ;
     </div>
   );
 }

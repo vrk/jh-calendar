@@ -3,6 +3,7 @@
 }
 
 .plusButton {
+  cursor: pointer;
   display: flex;
   border-radius: 15px;
   flex-direction: row;

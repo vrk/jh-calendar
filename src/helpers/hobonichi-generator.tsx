@@ -462,11 +462,13 @@ function getDateInfo(
 type ClickableDateProps = {
   dayInMonth: number;
   yearMonthInfo: YearMonthInfo;
+  onClick: () => void;
 };
 
 export function HobonichiCousinClickableDate({
   dayInMonth,
   yearMonthInfo,
+  onClick
 }: ClickableDateProps) {
   const itemWidth = 80;
   const itemHeight = 30;
@@ -514,7 +516,7 @@ export function HobonichiCousinClickableDate({
       y={y}
       width={itemWidth}
       height={itemHeight}
-      dayInMonth={dayInMonth}
+      onClick={onClick}
     ></DayAddPhotoButton>
   );
 }

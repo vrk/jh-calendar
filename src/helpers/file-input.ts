@@ -30,7 +30,7 @@ async function createImageElement(file: File): Promise<HTMLImageElement> {
   return createImageElementWithSrc(URL.createObjectURL(file));
 }
 
-async function createImageElementWithSrc(src: string): Promise<HTMLImageElement> {
+export async function createImageElementWithSrc(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const image = new Image();
     image.addEventListener("load", function () {

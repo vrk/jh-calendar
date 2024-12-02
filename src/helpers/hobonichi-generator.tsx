@@ -320,7 +320,15 @@ export function DateSquarePreview({
     if (!imageContainerRoot.current || !previewImage) {
       return;
     }
+    previewImage.id = "--preview-image--";
     imageContainerRoot.current.append(previewImage);
+    return () => {
+      if (!imageContainerRoot.current) {
+        return;
+      }
+      const added = imageContainerRoot.current.querySelector(`#${previewImage.id}`);
+      added?.remove();
+    }
   }, [imageContainerRoot, previewImage]);
   return (
     <DateSquare

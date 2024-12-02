@@ -31,6 +31,7 @@ const CropModal = ({
 }: React.PropsWithChildren<Props>) => {
   const [boundingBox, setBoundingBox] =
     React.useState<BoundingBoxValue>("writable-space");
+  const [previewImage, setPreviewImage] = React.useState<HTMLImageElement|null>(null);
 
   const selectedDate = new Date(
     yearMonthInfo.calYear,
@@ -59,12 +60,13 @@ const CropModal = ({
       <CanvasWrapper
         imageToCrop={imageToCrop}
         aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}
+        setPreviewImage={setPreviewImage}
       ></CanvasWrapper>
       <div className={styles.dateContainer}>
         <DateSquarePreview
           dateNumber={dateNumber}
           yearMonthInfo={yearMonthInfo}
-          previewImage={imageToCrop}
+          previewImage={previewImage}
           boundingBox={boundingBox}
         ></DateSquarePreview>
         <DropdownSelect<BoundingBoxValue>
@@ -123,15 +125,17 @@ const CropModal = ({
 type WrapperProps = {
   imageToCrop: HTMLImageElement | null;
   aspectRatio: number;
+  setPreviewImage: (image: HTMLImageElement) => void
 };
 
 function CanvasWrapper({
   imageToCrop,
   aspectRatio,
+  setPreviewImage
 }: React.PropsWithRef<WrapperProps>) {
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = React.useState<Canvas | null>(null);
-  useCropPhoto(fabricCanvas, imageToCrop, aspectRatio);
+  useCropPhoto(fabricCanvas, imageToCrop, aspectRatio, setPreviewImage);
   React.useEffect(() => {
     if (!htmlCanvas.current) {
       return;

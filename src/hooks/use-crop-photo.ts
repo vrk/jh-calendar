@@ -4,16 +4,19 @@ import {
   Rect,
   FabricImage,
   FabricObject,
+  ImageFormat,
   TPointerEventInfo,
   util,
 } from "fabric";
 import { useHotkeys } from "react-hotkeys-hook";
 import { RawImageData } from "@/helpers/calendar-data-types";
+import { createImageElementWithSrc } from "@/helpers/file-input";
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,
   imageToCrop: HTMLImageElement | null,
-  aspectRatio: number
+  aspectRatio: number,
+  setCroppedImage: (img: HTMLImageElement) => void
 ) {
   React.useEffect(() => {
     console.log("hi hi");
@@ -57,17 +60,33 @@ function useCropPhoto(
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
-    const onScaleMove = (e: any) => {
+    const onObjectModified = async (e: any) => {
       if (e.target !== rectangle) {
         return;
       }
       clampSizeToBounds(fabricImage, rectangle);
       clampLocationToBounds(fabricImage, rectangle);
+
+      const format: ImageFormat = "png";
+      const options = {
+        name: "New Image",
+        format,
+        quality: 1,
+        width: rectangle.getScaledWidth(),
+        height: rectangle.getScaledHeight(),
+        left: rectangle.left,
+        top: rectangle.top,
+        multiplier: 1,
+      };
+      const dataUrl = fabricCanvas.toDataURL(options);
+      const img = await createImageElementWithSrc(dataUrl);
+      setCroppedImage(img);
+
       fabricCanvas.requestRenderAll();
     };
 
-    fabricCanvas.on("object:modified", onScaleMove);
-    const onMove = (e: any) => {
+    fabricCanvas.on("object:modified", onObjectModified);
+    const onMove = async (e: any) => {
       if (e.target !== rectangle) {
         return;
       }
@@ -80,7 +99,7 @@ function useCropPhoto(
       fabricCanvas.remove(fabricImage);
       fabricCanvas.remove(rectangle);
       fabricCanvas.off("object:moving", onMove);
-      fabricCanvas.off("object:scaling", onScaleMove);
+      fabricCanvas.off("object:scaling", onObjectModified);
     };
   }, [fabricCanvas, imageToCrop, aspectRatio]);
 }

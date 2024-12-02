@@ -22,3 +22,15 @@ export function getTodaysYearMonthInfo(): YearMonthInfo {
     firstDateOfMonth: new Date(todaysYear, todaysMonth, 1)
   }
 }
+
+// Starts at 0, so 0 => week 1
+export function getWeekNumber(date: Date) {
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  let offset = firstDayOfMonth.getDay() - 1;
+  if (offset === -1) {
+    offset = 6;
+  }
+  const zeroIndexedDate = date.getDate() - 1;
+  const weekNumber = Math.floor((zeroIndexedDate + offset) / 7);
+  return weekNumber;
+}

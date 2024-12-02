@@ -39,6 +39,7 @@
 	flex-grow: 1;
 	height: 600px;
 	max-height: 80vh;
+	display: flex;
 }
 
 .Button {

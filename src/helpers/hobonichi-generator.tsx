@@ -1,6 +1,7 @@
+import * as React from "react";
 import { add, format } from "date-fns";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
-import { getYearMonthInfo } from "@/helpers/calendar-helpers";
+import { getWeekNumber, getYearMonthInfo } from "@/helpers/calendar-helpers";
 import DayAddPhotoButton from "@/components/DayAddPhotoButton";
 
 const PPI = 96;
@@ -108,6 +109,43 @@ function createGridsForPage(startingX: number, startingY: number) {
   return group;
 }
 
+function createGridsForBox(
+  startingX: number,
+  startingY: number,
+  numberBoxesWide: number,
+  numberBoxesTall: number
+) {
+  const group = createSvgElement("g");
+  for (
+    let y = 0;
+    y <= numberBoxesTall;
+    y++
+  ) {
+    const x1 = startingX;
+    const y1 = startingY + y * NUMBER_PIXELS_PER_GRID_BOX;
+    const x2 =
+      startingX +
+      numberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
+    const y2 = y1;
+    const line = createLine(x1, y1, x2, y2);
+    group.append(line);
+  }
+  for (
+    let x = 0;
+    x <= numberBoxesWide;
+    x++
+  ) {
+    const x1 = startingX + x * NUMBER_PIXELS_PER_GRID_BOX;
+    const y1 = startingY;
+    const x2 = x1;
+    const y2 =
+      startingY + numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+    const line = createLine(x1, y1, x2, y2);
+    group.append(line);
+  }
+  return group;
+}
+
 function createDates(
   startingX: number,
   startingY: number,
@@ -203,6 +241,61 @@ function createDateSquare(
   square.setAttribute("fill", "transparent");
   group.append(square);
   return group;
+}
+
+type DateSquareProps = {
+  dateNumber: number | null;
+  yearMonthInfo: YearMonthInfo;
+};
+export function DateSquare({
+  dateNumber,
+  yearMonthInfo,
+}: React.PropsWithChildren<DateSquareProps>) {
+  const svgRoot = React.useRef<SVGSVGElement>(null);
+  React.useEffect(() => {
+    if (!svgRoot.current || dateNumber === null) {
+      return;
+    }
+    const date = new Date(
+      yearMonthInfo.calYear,
+      yearMonthInfo.calMonth,
+      dateNumber
+    );
+    const weekNumber = getWeekNumber(date);
+    const numberBoxesTall =
+      weekNumber === 5 ? NUMBER_BOXES_PER_SIXTH_ROW_DAY : NUMBER_BOXES_PER_DAY;
+    const graphicHeight = numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+    const graphicWidth = NUMBER_PIXELS_PER_DAY;
+    svgRoot.current.setAttribute(
+      "viewBox",
+      `0 0 ${graphicWidth} ${graphicHeight}`
+    );
+    svgRoot.current.setAttribute("height", `${graphicHeight}`);
+    svgRoot.current.setAttribute("width", `${graphicHeight}`);
+
+    const grid = createGridsForBox(0, 0, NUMBER_BOXES_PER_DAY, numberBoxesTall);
+    svgRoot.current.append(grid);
+    const dateInfo = {
+      dateNumber,
+      isInMonth: true,
+      dayOfWeek: date.getDay(),
+    };
+    const staticContents =
+      weekNumber === 5
+        ? createSixthRowDateSquare(0, 0, dateInfo)
+        : createDateSquare(0, 0, dateInfo);
+    staticContents.id = `date-square-for-${dateNumber}`;
+    svgRoot.current.append(staticContents);
+
+    return () => {
+      if (!svgRoot.current) {
+        return;
+      }
+      const added = svgRoot.current.querySelector(`#${staticContents.id}`);
+      added?.remove();
+    };
+  }, [svgRoot, dateNumber, yearMonthInfo]);
+  return <svg ref={svgRoot}></svg>;
 }
 
 function createSixthRowDateSquare(
@@ -468,7 +561,7 @@ type ClickableDateProps = {
 export function HobonichiCousinClickableDate({
   dayInMonth,
   yearMonthInfo,
-  onClick
+  onClick,
 }: ClickableDateProps) {
   const itemWidth = 80;
   const itemHeight = 30;

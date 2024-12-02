@@ -59,6 +59,7 @@ function CalendarView() {
     setImageToCrop(loadedData.imageElement);
     setSelectedDayNumber(dayInMonth);
   };
+
   return (
     <div className={style.container} ref={totalRoot}>
       <CropModal

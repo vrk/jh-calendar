@@ -1,6 +1,6 @@
 import * as React from "react";
 import { add, format } from "date-fns";
-import { YearMonthInfo } from "@/helpers/calendar-data-types";
+import { BoundingBoxValue, YearMonthInfo } from "@/helpers/calendar-data-types";
 import { getWeekNumber, getYearMonthInfo } from "@/helpers/calendar-helpers";
 import DayAddPhotoButton from "@/components/DayAddPhotoButton";
 import style from "./hobonichi-generator.module.css";
@@ -302,7 +302,6 @@ export function getDateSquareBoundsForDate(date: Date) {
   return values;
 }
 
-type BoundingBoxValue = "square" | "writable-space";
 type DateSquarePreviewProps = {
   dateNumber: number | null;
   yearMonthInfo: YearMonthInfo;

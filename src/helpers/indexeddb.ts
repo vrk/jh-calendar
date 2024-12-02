@@ -19,12 +19,9 @@ import { getYearMonthInfo } from "./calendar-helpers";
 const DATABASE_NAME = "December2024CalendarHelperDb";
 
 const FULL_IMAGE_STORE_NAME = "FullImages";
-const THUMBNAIL_IMAGE_STORE_NAME = "ThumbnailFullImage";
 const CROPPED_PHOTO_STORE_NAME = "CroppedDatePhoto";
-const PRINTABLE_CROPPED_PHOTO_STORE_NAME = "PrintableCroppedDatePhoto";
 
 const CROPPED_TO_FULL_INDEX_NAME = "CroppedToFull";
-const PRINTABLE_TO_FULL_INDEX_NAME = "PrintableToFull";
 
 const FULL_INDEX_KEY_NAME = "fullImageId";
 
@@ -65,21 +62,10 @@ export async function getDatabase(): Promise<IDBDatabase> {
 
       db.createObjectStore(FULL_IMAGE_STORE_NAME, { keyPath: "id" });
 
-      db.createObjectStore(THUMBNAIL_IMAGE_STORE_NAME, {
-        keyPath: "fromFullImageId",
-      });
-
       const croppedStore = db.createObjectStore(CROPPED_PHOTO_STORE_NAME, {
         keyPath: "dayOfMonth",
       });
       croppedStore.createIndex(CROPPED_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
-        unique: false,
-      });
-
-      const printableStore = db.createObjectStore(PRINTABLE_CROPPED_PHOTO_STORE_NAME, {
-        keyPath: "dayOfMonth",
-      });
-      printableStore.createIndex(PRINTABLE_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
         unique: false,
       });
     };

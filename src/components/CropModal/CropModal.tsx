@@ -8,19 +8,18 @@ import {
   DateSquarePreview,
   getDateSquareBoundsForDate,
 } from "@/helpers/hobonichi-generator";
-import { YearMonthInfo } from "@/helpers/calendar-data-types";
+import { BoundingBoxValue, ClipPathInfo, FullCroppedPhotoInfo, YearMonthInfo } from "@/helpers/calendar-data-types";
 import DropdownSelect from "../DropdownSelect";
 
 type Props = {
   isOpen: boolean;
   dateNumber: number | null;
   yearMonthInfo: YearMonthInfo;
-  onConfirm: () => void;
+  onConfirm: (croppedImage: HTMLImageElement, fullCroppedPhotoInfo: FullCroppedPhotoInfo) => void;
   onOpenChange: (isOpen: boolean) => void;
   imageToCrop: HTMLImageElement | null;
 };
 
-type BoundingBoxValue = "square" | "writable-space";
 const CropModal = ({
   isOpen,
   dateNumber,
@@ -32,6 +31,7 @@ const CropModal = ({
   const [boundingBox, setBoundingBox] =
     React.useState<BoundingBoxValue>("writable-space");
   const [previewImage, setPreviewImage] = React.useState<HTMLImageElement|null>(null);
+  const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo|null>(null);
 
   const selectedDate = new Date(
     yearMonthInfo.calYear,
@@ -47,11 +47,24 @@ const CropModal = ({
     bounds.totalBoxesTallWritable
   );
 
+  const onDialogConfirmed = () => {
+    if (!previewImage || !clipPathInfo) {
+      return;
+    }
+    const photoInfo: FullCroppedPhotoInfo = {
+      clipPathInfo,
+      boundingBox: boundingBox,
+      squaresWide: cropNumberBoxesWide,
+      squaresTall: cropNumberBoxesTall
+    };
+    onConfirm(previewImage, photoInfo);
+  } 
+
   return (
     <ConfirmationDialog
       className={styles.dialog}
       isOpen={isOpen}
-      onConfirm={onConfirm}
+      onConfirm={onDialogConfirmed}
       onOpenChange={onOpenChange}
       title="Crop image"
       confirm="Crop"
@@ -61,6 +74,7 @@ const CropModal = ({
         imageToCrop={imageToCrop}
         aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}
         setPreviewImage={setPreviewImage}
+        setClipPathInfo={setClipPathInfo}
       ></CanvasWrapper>
       <div className={styles.dateContainer}>
         <DateSquarePreview
@@ -127,17 +141,19 @@ const CropModal = ({
 type WrapperProps = {
   imageToCrop: HTMLImageElement | null;
   aspectRatio: number;
-  setPreviewImage: (image: HTMLImageElement) => void
+  setPreviewImage: (image: HTMLImageElement) => void;
+  setClipPathInfo: (ClipPathInfo: ClipPathInfo) => void;
 };
 
 function CanvasWrapper({
   imageToCrop,
   aspectRatio,
-  setPreviewImage
+  setPreviewImage,
+  setClipPathInfo
 }: React.PropsWithRef<WrapperProps>) {
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = React.useState<Canvas | null>(null);
-  useCropPhoto(fabricCanvas, imageToCrop, aspectRatio, setPreviewImage);
+  useCropPhoto(fabricCanvas, imageToCrop, aspectRatio, setPreviewImage, setClipPathInfo);
   React.useEffect(() => {
     if (!htmlCanvas.current) {
       return;

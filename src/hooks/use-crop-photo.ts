@@ -9,7 +9,7 @@ import {
   util,
 } from "fabric";
 import { useHotkeys } from "react-hotkeys-hook";
-import { RawImageData } from "@/helpers/calendar-data-types";
+import { ClipPathInfo, RawImageData } from "@/helpers/calendar-data-types";
 import { createImageElementWithSrc } from "@/helpers/file-input";
 
 function useCropPhoto(

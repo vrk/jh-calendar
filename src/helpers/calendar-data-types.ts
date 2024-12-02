@@ -20,9 +20,13 @@ export type ResizedImage = {
   imageData: RawImageData;
 };
 
+export type BoundingBoxValue = "square" | "writable-space";
+
 export type FullCroppedPhotoInfo = {
-  fullImage: FullImage;
   clipPathInfo: ClipPathInfo
+  boundingBox: BoundingBoxValue;
+  squaresWide: number;
+  squaresTall: number;
 };
 
 export type ClipPathInfo = {

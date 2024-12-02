@@ -1,10 +1,11 @@
 import { add, format } from "date-fns";
 import { YearMonthInfo } from "@/helpers/calendar-data-types";
 import { getYearMonthInfo } from "@/helpers/calendar-helpers";
+import style from "./hobonichi-generator.module.css";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
-const GRID_BOX_WIDTH_IN_PIXELS = PPI * GRID_BOX_WIDTH_IN_INCHES;
+const NUMBER_PIXELS_PER_GRID_BOX = PPI * GRID_BOX_WIDTH_IN_INCHES;
 
 const NUMBER_BOXES_IN_MARGIN = 2;
 const NUMBER_BOXES_IN_HEADER = 2;
@@ -16,9 +17,9 @@ const NUMBER_BOXES_PER_SIXTH_ROW_DAY = 6;
 const NUMBER_OF_COLUMNS = 4;
 const NUMBER_OF_ROWS = 5;
 
-const NUMBER_PIXELS_PER_DAY = NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS;
+const NUMBER_PIXELS_PER_DAY = NUMBER_BOXES_PER_DAY * NUMBER_PIXELS_PER_GRID_BOX;
 const NUMBER_PIXELS_PER_MARGIN =
-  NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+  NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
 
 function createSvgElement(name: string) {
   return document.createElementNS("http://www.w3.org/2000/svg", name);
@@ -26,8 +27,9 @@ function createSvgElement(name: string) {
 
 export function createCousinCalendarSvg(svg: SVGSVGElement, yearMonth: string) {
   const graphicWidth =
-    GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_WIDTH * 2;
-  const graphicHeight = GRID_BOX_WIDTH_IN_PIXELS * NUMBER_BOXES_PER_PAGE_HEIGHT;
+    NUMBER_PIXELS_PER_GRID_BOX * NUMBER_BOXES_PER_PAGE_WIDTH * 2;
+  const graphicHeight =
+    NUMBER_PIXELS_PER_GRID_BOX * NUMBER_BOXES_PER_PAGE_HEIGHT;
   svg.setAttribute("viewBox", `0 0 ${graphicWidth} ${graphicHeight}`);
   svg.setAttribute("style", "border: 1px solid gainsboro");
   svg.setAttribute("preserveAspectRatio", "xMinYMin");
@@ -41,8 +43,8 @@ export function createCousinCalendarSvg(svg: SVGSVGElement, yearMonth: string) {
 
   const staticContentsGroup = createSvgElement("g");
 
-  const leftStartingX = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
-  const leftStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+  const leftStartingX = NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
+  const leftStartingY = NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
   const leftPageGrid = createGridsForPage(leftStartingX, leftStartingY);
   const leftPageBoxes = createDates(
     leftStartingX,
@@ -52,9 +54,9 @@ export function createCousinCalendarSvg(svg: SVGSVGElement, yearMonth: string) {
   );
 
   const rightStartingX =
-    NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS +
-    NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS;
-  const rightStartingY = NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+    NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX +
+    NUMBER_BOXES_PER_PAGE_WIDTH * NUMBER_PIXELS_PER_GRID_BOX;
+  const rightStartingY = NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
   const rightPageGrid = createGridsForPage(rightStartingX, rightStartingY);
   const rightPageBoxes = createDates(
     rightStartingX,
@@ -79,11 +81,11 @@ function createGridsForPage(startingX: number, startingY: number) {
     y++
   ) {
     const x1 = startingX;
-    const y1 = startingY + y * GRID_BOX_WIDTH_IN_PIXELS;
+    const y1 = startingY + y * NUMBER_PIXELS_PER_GRID_BOX;
     const x2 =
       startingX +
-      NUMBER_BOXES_PER_PAGE_WIDTH * GRID_BOX_WIDTH_IN_PIXELS -
-      2 * NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+      NUMBER_BOXES_PER_PAGE_WIDTH * NUMBER_PIXELS_PER_GRID_BOX -
+      2 * NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
     const y2 = y1;
     const line = createLine(x1, y1, x2, y2);
     group.append(line);
@@ -93,13 +95,13 @@ function createGridsForPage(startingX: number, startingY: number) {
     x <= NUMBER_BOXES_PER_PAGE_WIDTH - 2 * NUMBER_BOXES_IN_MARGIN;
     x++
   ) {
-    const x1 = startingX + x * GRID_BOX_WIDTH_IN_PIXELS;
+    const x1 = startingX + x * NUMBER_PIXELS_PER_GRID_BOX;
     const y1 = startingY;
     const x2 = x1;
     const y2 =
       startingY +
-      NUMBER_BOXES_PER_PAGE_HEIGHT * GRID_BOX_WIDTH_IN_PIXELS -
-      2 * NUMBER_BOXES_IN_MARGIN * GRID_BOX_WIDTH_IN_PIXELS;
+      NUMBER_BOXES_PER_PAGE_HEIGHT * NUMBER_PIXELS_PER_GRID_BOX -
+      2 * NUMBER_BOXES_IN_MARGIN * NUMBER_PIXELS_PER_GRID_BOX;
     const line = createLine(x1, y1, x2, y2);
     group.append(line);
   }
@@ -188,11 +190,11 @@ function createDateSquare(
   const square = createSvgElement("rect");
   square.setAttribute(
     "width",
-    `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${NUMBER_BOXES_PER_DAY * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute(
     "height",
-    `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${NUMBER_BOXES_PER_DAY * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
@@ -214,11 +216,11 @@ function createSixthRowDateSquare(
   const square = createSvgElement("rect");
   square.setAttribute(
     "width",
-    `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${NUMBER_BOXES_PER_DAY * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute(
     "height",
-    `${NUMBER_BOXES_PER_SIXTH_ROW_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${NUMBER_BOXES_PER_SIXTH_ROW_DAY * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
@@ -279,7 +281,7 @@ function createMonthHeader(
   const monthOffset = 10;
   const monthX = NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_MARGIN - monthOffset;
   const monthY =
-    NUMBER_BOXES_IN_HEADER * 2 * GRID_BOX_WIDTH_IN_PIXELS +
+    NUMBER_BOXES_IN_HEADER * 2 * NUMBER_PIXELS_PER_GRID_BOX +
     NUMBER_PIXELS_PER_MARGIN -
     monthOffset;
   const monthText = createTextAtSize(monthLabel, monthX, monthY, 28);
@@ -323,11 +325,11 @@ function createFillSvg(
     : NUMBER_BOXES_IN_HEADER;
   square.setAttribute(
     "width",
-    `${NUMBER_BOXES_PER_DAY * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${NUMBER_BOXES_PER_DAY * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute(
     "height",
-    `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`
+    `${numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX}`
   );
   square.setAttribute("x", `${startingX}`);
   square.setAttribute("y", `${startingY}`);
@@ -360,16 +362,19 @@ function createText(
   position: Position
 ) {
   const text = createSvgElement("text");
-  let offset = GRID_BOX_WIDTH_IN_PIXELS;
+  let offset = NUMBER_PIXELS_PER_GRID_BOX;
   if (position === Position.MiddleRight) {
-    offset = GRID_BOX_WIDTH_IN_PIXELS * 5;
+    offset = NUMBER_PIXELS_PER_GRID_BOX * 5;
   }
   text.setAttribute("x", `${startingX + offset}`);
   text.setAttribute(
     "y",
-    `${startingY + (numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS) / 2 + 1}`
+    `${startingY + (numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX) / 2 + 1}`
   );
-  text.setAttribute("height", `${numberBoxesTall * GRID_BOX_WIDTH_IN_PIXELS}`);
+  text.setAttribute(
+    "height",
+    `${numberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX}`
+  );
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("fill", "black");
@@ -458,12 +463,13 @@ type ClickableDateProps = {
   dayInMonth: number;
   yearMonthInfo: YearMonthInfo;
 };
+
 export function ClickableDate({
   dayInMonth,
   yearMonthInfo,
 }: ClickableDateProps) {
-  const itemWidth = 50;
-  const itemHeight = 50;
+  const itemWidth = 80;
+  const itemHeight = 30;
 
   const today = new Date(
     yearMonthInfo.calYear,
@@ -490,44 +496,35 @@ export function ClickableDate({
 
   const widthDelta = NUMBER_PIXELS_PER_DAY - itemWidth;
   const x = margin + todaysDay * NUMBER_PIXELS_PER_DAY + widthDelta / 2;
-  const cx =
-    margin + todaysDay * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_DAY / 2;
-  const heightDelta = NUMBER_PIXELS_PER_DAY - itemHeight;
-  const y =
+
+  const heightOfMyBox =
+    weekNumber === 5
+      ? NUMBER_BOXES_PER_SIXTH_ROW_DAY * NUMBER_PIXELS_PER_GRID_BOX
+      : NUMBER_PIXELS_PER_DAY;
+
+  const heightDelta = heightOfMyBox - itemHeight;
+  let y =
     weekNumber * NUMBER_PIXELS_PER_DAY +
     NUMBER_PIXELS_PER_MARGIN * 2 +
     heightDelta / 2;
-  const cy =
-    weekNumber * NUMBER_PIXELS_PER_DAY +
-    NUMBER_PIXELS_PER_MARGIN * 2 +
-    NUMBER_PIXELS_PER_DAY / 2;
-
-  const lengthOfPlus = itemWidth / 3;
-  const plusX1 =
-    margin +
-    todaysDay * NUMBER_PIXELS_PER_DAY +
-    NUMBER_PIXELS_PER_DAY / 2 -
-    lengthOfPlus / 2;
-  const plusY1 =
-    weekNumber * NUMBER_PIXELS_PER_DAY +
-    NUMBER_PIXELS_PER_MARGIN * 2 +
-    NUMBER_PIXELS_PER_DAY / 2;
-  const path1 = `M${plusX1} ${plusY1} H${plusX1 + lengthOfPlus}`;
-
-  const plusX2 =
-    margin + todaysDay * NUMBER_PIXELS_PER_DAY + NUMBER_PIXELS_PER_DAY / 2;
-  const plusY2 =
-    weekNumber * NUMBER_PIXELS_PER_DAY +
-    NUMBER_PIXELS_PER_MARGIN * 2 +
-    NUMBER_PIXELS_PER_DAY / 2 -
-    lengthOfPlus / 2;
-  const path2 = `M${plusX2} ${plusY2} V${plusY2 + lengthOfPlus}`;
-
+    
   return (
     <g>
-      <circle cx={cx} cy={cy} r={itemWidth / 2} fill="lightgray"></circle>
+      {/* <circle cx={cx} cy={cy} r={itemWidth / 2} fill="lightgreen" stroke="green" strokeWidth={2}></circle>
       <Line path={path1}></Line>
-      <Line path={path2}></Line>
+      <Line path={path2}></Line> */}
+      <foreignObject
+        className={style.plusButtonContainer}
+        x={x}
+        y={y}
+        width={itemWidth}
+        height={itemHeight}
+      >
+        <div className={style.plusButton}>
+          <span className={style.plus}>+</span>{" "}
+          <span className={style.add}>Photo</span>
+        </div>
+      </foreignObject>
     </g>
   );
 }

@@ -68,6 +68,8 @@ const CropModal = ({
           yearMonthInfo={yearMonthInfo}
           previewImage={previewImage}
           boundingBox={boundingBox}
+          cropNumberBoxesTall={cropNumberBoxesTall}
+          cropNumberBoxesWide={cropNumberBoxesWide}
         ></DateSquarePreview>
         <DropdownSelect<BoundingBoxValue>
           title="Bounding box"

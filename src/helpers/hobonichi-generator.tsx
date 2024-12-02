@@ -291,52 +291,86 @@ export function DateSquare({
 
 export function getDateSquareBoundsForDate(date: Date) {
   const weekNumber = getWeekNumber(date);
-  const boxesTall = weekNumber === 5? NUMBER_BOXES_PER_SIXTH_ROW_DAY : NUMBER_BOXES_PER_DAY;
+  const boxesTall =
+    weekNumber === 5 ? NUMBER_BOXES_PER_SIXTH_ROW_DAY : NUMBER_BOXES_PER_DAY;
   const values = {
     totalBoxesInHeader: NUMBER_BOXES_IN_HEADER,
-    totalBoxesTallWholeSquare: boxesTall, 
-    totalBoxesTallWritable: boxesTall - NUMBER_BOXES_IN_HEADER, 
-    totalBoxesWide: NUMBER_BOXES_PER_DAY
-  }
+    totalBoxesTallWholeSquare: boxesTall,
+    totalBoxesTallWritable: boxesTall - NUMBER_BOXES_IN_HEADER,
+    totalBoxesWide: NUMBER_BOXES_PER_DAY,
+  };
   return values;
 }
 
-type BoundingBoxValue = "square"|"writable-space"
+type BoundingBoxValue = "square" | "writable-space";
 type DateSquarePreviewProps = {
   dateNumber: number | null;
   yearMonthInfo: YearMonthInfo;
   previewImage: HTMLImageElement | null;
-  boundingBox: BoundingBoxValue; 
+  boundingBox: BoundingBoxValue;
+  cropNumberBoxesWide: number;
+  cropNumberBoxesTall: number;
 };
 export function DateSquarePreview({
   dateNumber,
   yearMonthInfo,
   previewImage,
-  boundingBox
+  boundingBox,
+  cropNumberBoxesWide,
+  cropNumberBoxesTall,
 }: DateSquarePreviewProps) {
   const imageContainerRoot = React.useRef<HTMLDivElement>(null);
+  const boundingClass =
+    boundingBox === "square" ? style.boundingSquare : style.boundingWritable;
 
   React.useEffect(() => {
-    if (!imageContainerRoot.current || !previewImage) {
+    if (!imageContainerRoot.current || !previewImage || !dateNumber) {
       return;
     }
+
+    const selectedDate = new Date(
+      yearMonthInfo.calYear,
+      yearMonthInfo.calMonth,
+      dateNumber
+    );
+    const maxBounds = getDateSquareBoundsForDate(selectedDate);
+    imageContainerRoot.current.style.width = `${
+      maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
+    }px`;
+    debugger;
+    const maxBoxesTall = boundingBox === "square" ? maxBounds.totalBoxesTallWholeSquare : maxBounds.totalBoxesTallWritable;
+    imageContainerRoot.current.style.height = `${
+      maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
+    }px`;
+
     previewImage.id = "--preview-image--";
     imageContainerRoot.current.append(previewImage);
+    previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
+    previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
     return () => {
       if (!imageContainerRoot.current) {
         return;
       }
-      const added = imageContainerRoot.current.querySelector(`#${previewImage.id}`);
+      const added = imageContainerRoot.current.querySelector(
+        `#${previewImage.id}`
+      );
       added?.remove();
-    }
-  }, [imageContainerRoot, previewImage]);
+    };
+  }, [
+    imageContainerRoot,
+    dateNumber,
+    previewImage,
+    boundingBox,
+    cropNumberBoxesTall,
+    cropNumberBoxesWide,
+  ]);
   return (
-    <DateSquare
-      dateNumber={dateNumber}
-      yearMonthInfo={yearMonthInfo}
-    >
-      <foreignObject className={style.foreignObject}>
-        <div ref={imageContainerRoot} className={style.photoPreviewContainer}></div>
+    <DateSquare dateNumber={dateNumber} yearMonthInfo={yearMonthInfo}>
+      <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
+        <div
+          ref={imageContainerRoot}
+          className={`${style.photoPreviewContainer} ${boundingClass}`}
+        ></div>
       </foreignObject>
     </DateSquare>
   );

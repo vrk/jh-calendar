@@ -1,12 +1,21 @@
 .foreignObject {
   height: 100%;
   width: 100%;
+  position: relative;
 }
 
 .photoPreviewContainer {
-  height: 100%;
-  width: 100%;
+  display:flex;
+  position: absolute;
+  left: 0;
+  justify-content: center;
+  align-items: center;
+  bottom: 0;
+  right: 0;
 }
 
-.photoPreviewContainer img {
+.photoPreviewContainer.boundingSquare {
+}
+
+.photoPreviewContainer.boundingWritable {
 }

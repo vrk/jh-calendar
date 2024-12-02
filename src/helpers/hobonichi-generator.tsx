@@ -316,10 +316,14 @@ type DateSquarePreviewProps = {
   cropNumberBoxesTall: number;
   uniqueid: string;
 };
-export function DateSquarePreview(props: React.PropsWithRef<DateSquarePreviewProps>) {
+export function DateSquarePreview(
+  props: React.PropsWithRef<DateSquarePreviewProps>
+) {
   const imageContainerRoot = React.useRef<HTMLDivElement | null>(null);
   const boundingClass =
-  props.boundingBox === "square" ? style.boundingSquare : style.boundingWritable;
+    props.boundingBox === "square"
+      ? style.boundingSquare
+      : style.boundingWritable;
   const [isRefVisible, setIsRefVisible] = React.useState(false);
 
   React.useEffect(() => {
@@ -327,11 +331,9 @@ export function DateSquarePreview(props: React.PropsWithRef<DateSquarePreviewPro
     if (!imageContainerRoot.current) {
       return;
     }
-    const remove = addImage(imageContainerRoot.current,props);
+    const remove = addImage(imageContainerRoot.current, props);
     return remove;
-  }, [
-    isRefVisible,
-  ]);
+  }, [isRefVisible]);
   return (
     <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
       <div
@@ -340,6 +342,7 @@ export function DateSquarePreview(props: React.PropsWithRef<DateSquarePreviewPro
           imageContainerRoot.current = el;
           setIsRefVisible(!!el);
           if (el) {
+            el.innerHTML = '';
             addImage(el, props);
           }
         }}
@@ -352,58 +355,46 @@ export function DateSquarePreview(props: React.PropsWithRef<DateSquarePreviewPro
 function addImage(
   el: HTMLDivElement,
   {
-  dateNumber,
-  yearMonthInfo,
-  previewImage,
-  boundingBox,
-  cropNumberBoxesWide,
-  cropNumberBoxesTall,
-  uniqueid,
-} : DateSquarePreviewProps) {
+    dateNumber,
+    yearMonthInfo,
+    previewImage,
+    boundingBox,
+    cropNumberBoxesWide,
+    cropNumberBoxesTall,
+    uniqueid,
+  }: DateSquarePreviewProps
+) {
+  if (!el || !previewImage || !dateNumber) {
+    console.log("EARLY RETURN", dateNumber, previewImage, el);
+    return;
+  }
 
-    if (!el || !previewImage || !dateNumber) {
-      console.log(
-        "EARLY RETURN",
-        dateNumber,
-        previewImage,
-        el
-      );
+  const selectedDate = new Date(
+    yearMonthInfo.calYear,
+    yearMonthInfo.calMonth,
+    dateNumber
+  );
+  const maxBounds = getDateSquareBoundsForDate(selectedDate);
+  el.style.width = `${maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX}px`;
+  const maxBoxesTall =
+    boundingBox === "square"
+      ? maxBounds.totalBoxesTallWholeSquare
+      : maxBounds.totalBoxesTallWritable;
+  el.style.height = `${maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX}px`;
+
+  previewImage.id = `${uniqueid}--preview-image--${dateNumber}`;
+  el.append(previewImage);
+  previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
+  previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+  console.log("adding back", previewImage.id);
+  return () => {
+    if (!el) {
       return;
     }
-
-    const selectedDate = new Date(
-      yearMonthInfo.calYear,
-      yearMonthInfo.calMonth,
-      dateNumber
-    );
-    const maxBounds = getDateSquareBoundsForDate(selectedDate);
-    el.style.width = `${
-      maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
-    }px`;
-    const maxBoxesTall =
-      boundingBox === "square"
-        ? maxBounds.totalBoxesTallWholeSquare
-        : maxBounds.totalBoxesTallWritable;
-        el.style.height = `${
-      maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
-    }px`;
-
-    previewImage.id = `${uniqueid}--preview-image--${dateNumber}`;
-    el.append(previewImage);
-    previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
-    previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
-    console.log("adding back", previewImage.id);
-    return () => {
-      if (!el) {
-        return;
-      }
-      const added = el.querySelector(
-        `#${previewImage.id}`
-      );
-      added?.remove();
-      console.log("removing!!!!!!", previewImage.id);
-    };
-
+    const added = el.querySelector(`#${previewImage.id}`);
+    added?.remove();
+    console.log("removing!!!!!!", previewImage.id);
+  };
 }
 
 function createSixthRowDateSquare(

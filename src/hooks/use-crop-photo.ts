@@ -32,6 +32,7 @@ function useCropPhoto(
       width: 100,
       height: 100,
       strokeUniform: true,
+      noScaleCache: false,
       stroke: "black",
       strokeWidth: 2,
       cornerStyle: "circle",
@@ -43,7 +44,43 @@ function useCropPhoto(
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
-    fabricCanvas.on("object:modified", (e: any) => {
+    fabricCanvas.on("object:scaling", (e: any) =>{
+      const maxWidth = fabricImage.getScaledWidth();
+      const maxHeight = fabricImage.getScaledHeight();
+      const topOffset = fabricImage.top;
+      const leftOffset = fabricImage.left;
+      var obj = e.target as Rect;
+        console.log(obj.height, obj.getScaledHeight());
+      if (obj.getScaledHeight() > maxHeight) {
+        const maxScaleRatio = maxHeight / obj.height; 
+        obj.scaleY = maxScaleRatio;
+      }
+      if (obj.getScaledWidth() > maxWidth) {
+        const maxScaleRatio = maxWidth / obj.width 
+        obj.scaleX = maxScaleRatio;
+      }
+      // top-left  corner
+      if (obj.top < topOffset) {
+        // maintain same size
+        obj.top = topOffset;
+      }
+      if (obj.left < leftOffset) {
+        obj.left = leftOffset;
+      }
+      // Bottom right corner
+      const objBottom = obj.top + obj.getScaledHeight();
+      if (objBottom > maxHeight + topOffset) {
+        obj.top = topOffset + (maxHeight - obj.getScaledHeight());
+      }
+      const objRight = obj.left + obj.getScaledWidth();
+      if (objRight > maxWidth + leftOffset) {
+        obj.left = leftOffset + (maxWidth - obj.getScaledWidth());
+      }
+
+
+
+    })
+    fabricCanvas.on("object:moving", (e: any) => {
       const maxWidth = fabricImage.getScaledWidth();
       const maxHeight = fabricImage.getScaledHeight();
       const topOffset = fabricImage.top;

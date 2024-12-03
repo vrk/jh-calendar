@@ -6,6 +6,6 @@ declare module 'fabric' {
 
     spreadItemId?: string;
     spreadId?: string;
-    imageId?: string;
+    id?: string;
   }
 }

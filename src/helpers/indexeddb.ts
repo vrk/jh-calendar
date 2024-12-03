@@ -1,5 +1,11 @@
 "use client";
-import { croppedPhotoToRawData, FullCroppedPhotoInfo, YearMonthInfo } from "./calendar-data-types";
+import {
+  croppedPhotoToRawData,
+  FullCroppedPhotoInfo,
+  FullCroppedPhotoRawData,
+  rawDataToCroppedPhoto,
+  YearMonthInfo,
+} from "./calendar-data-types";
 import { getYearMonthInfo } from "./calendar-helpers";
 
 //
@@ -54,7 +60,10 @@ export async function getDatabase(): Promise<IDBDatabase> {
   });
 }
 
-export async function saveImageDataForDateDb(dayOfMonth: number, imageData: FullCroppedPhotoInfo): Promise<void> {
+export async function saveImageDataForDateDb(
+  dayOfMonth: number,
+  imageData: FullCroppedPhotoInfo
+): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const db = await getDatabase();
     const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME, "readwrite");
@@ -64,7 +73,7 @@ export async function saveImageDataForDateDb(dayOfMonth: number, imageData: Full
 
     const request = objectStore.add({
       id: dayOfMonth,
-      rawImageData
+      rawImageData,
     });
     request.onerror = () => {
       reject(`Could not create object with id: ${dayOfMonth}`);
@@ -73,4 +82,58 @@ export async function saveImageDataForDateDb(dayOfMonth: number, imageData: Full
       resolve();
     };
   });
+}
+
+export async function loadAllImageDataFromDb(
+  onImageLoaded: (dayOfMonth: number, image: FullCroppedPhotoInfo) => void,
+  onFinished: () => void
+) {
+  return new Promise(async (resolve, reject) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME);
+    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
+    const request = objectStore.openCursor();
+    request.onsuccess = async () => {
+      const cursor = request.result;
+      if (cursor) {
+        const rawImageData: FullCroppedPhotoRawData = cursor.value.rawImageData;
+        console.log(cursor.value.id);
+        const image = rawDataToCroppedPhoto(rawImageData);
+        onImageLoaded(cursor.value.id, image);
+        cursor.continue();
+      } else {
+        onFinished();
+      }
+    };
+    request.onerror = () => {
+      reject("Could not get all journals");
+    };
+  });
+}
+
+export async function loadAllImageDataFromDb2(
+  onImageLoaded: (dayOfMonth: number, image: FullCroppedPhotoInfo) => void,
+  onFinished: () => void
+) {
+  let count = 0;
+  const executor = async (resolve: any, reject: any) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME);
+    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
+    const request = objectStore.getAll();
+    request.onsuccess = () => {
+      for (const result of request.result) {
+        console.log('hello', count++);
+        const rawImageData: FullCroppedPhotoRawData = result.rawImageData;
+        const image = rawDataToCroppedPhoto(rawImageData);
+        onImageLoaded(result.id, image);
+      }
+      onFinished();
+    };
+    request.onerror = () => {
+      reject("Could not get all journals");
+    };
+    resolve(transaction);
+  };
+  return new Promise(executor);
 }

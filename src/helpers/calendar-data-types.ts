@@ -1,4 +1,5 @@
 import PhotoTray from "@/components/PhotoTray";
+import { createImageElementWithSrc } from "./file-input";
 
 export type YearMonthInfo = {
   calMonth: number; // 0-index based
@@ -58,6 +59,22 @@ export function croppedPhotoToRawData(
       width: photoInfo.croppedImage.width,
     },
     metadata: { ...photoInfo.metadata },
+  };
+  return converted;
+}
+
+export function rawDataToCroppedPhoto(
+  rawData: FullCroppedPhotoRawData
+) {
+  const fullImage = new Image();
+  fullImage.src = rawData.fullImageData.data;
+  const croppedImage = new Image();
+  croppedImage.src = rawData.croppedImageData.data;
+  
+  const converted: FullCroppedPhotoInfo = {
+    fullImage,
+    croppedImage,
+    metadata: { ...rawData.metadata },
   };
   return converted;
 }

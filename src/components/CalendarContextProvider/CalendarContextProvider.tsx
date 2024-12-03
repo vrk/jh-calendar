@@ -15,11 +15,16 @@ import {
   loadYearMonthInfo,
   saveYearMonthInfo,
   saveImageDataForDateDb,
+  loadAllImageDataFromDb,
+  loadAllImageDataFromDb2,
 } from "@/helpers/indexeddb";
 import React from "react";
 
 type CalendarFunctions = {
-  setPhotoForDate: (date: ValidDate, photoInfo: FullCroppedPhotoInfo) => Promise<void>;
+  setPhotoForDate: (
+    date: ValidDate,
+    photoInfo: FullCroppedPhotoInfo
+  ) => Promise<void>;
   removePhotoForDate: (date: ValidDate) => Promise<void>;
 
   setYearMonth: (yearMonth: string) => void;
@@ -72,19 +77,18 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
   const [yearMonthInfo, setYearMonthInfoState] = React.useState(
     loadedInfo ? loadedInfo : getTodaysYearMonthInfo()
   );
+  const [ignored, forceUpdate] = React.useReducer(x => x + 1, 0);
 
-  const [imagesByDateMap, setImagesByDateMap] = React.useState(
-    new Map<ValidDate, FullCroppedPhotoInfo>()
-  );
+  const imagesByDateMap = React.useMemo( () => 
+     new Map<ValidDate, FullCroppedPhotoInfo>()
+  , []);
 
   const calendarFunctions: CalendarFunctions = {
     setPhotoForDate: async function (
       date: ValidDate,
       fullCroppedPhotoInfo: FullCroppedPhotoInfo
     ) {
-      const newMap = new Map(imagesByDateMap).set(date, fullCroppedPhotoInfo);
-      setImagesByDateMap(newMap);
-
+      addPhotoToState(date, fullCroppedPhotoInfo);
       return saveImageDataForDateDb(date, fullCroppedPhotoInfo);
     },
     removePhotoForDate: async function (date: ValidDate) {
@@ -99,14 +103,46 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     },
   };
 
-  const initializeContext = async () => {};
+
+
+  const addPhotoToState = (
+    date: ValidDate,
+    fullCroppedPhotoInfo: FullCroppedPhotoInfo
+  ) => {
+    imagesByDateMap.set(date, fullCroppedPhotoInfo);
+    forceUpdate();
+  };
+
+  const initializeContext = () => {
+  };
 
   React.useEffect(() => {
+    console.log("LOADED", loadedStatus);
     setLoadedStatus(LoadedStatus.Loading);
-    initializeContext().then(() => {
-      setLoadedStatus(LoadedStatus.Loaded);
-    });
+    if (loadedStatus === LoadedStatus.Loaded) {
+      return;
+    }
+    console.timeEnd();
+    console.time();
+    console.log('!!!starting request');
+    const onImageLoaded = (dayOfMonth: number, image: FullCroppedPhotoInfo) => {
+      addPhotoToState(dayOfMonth as ValidDate, image);
+    };
+    const onFinished = () => {
+      console.timeLog();
+      console.log('!!!! ending request');
+    };
+
+    const controller = new AbortController();
+    const promise = loadAllImageDataFromDb(onImageLoaded, onFinished);
+
+    return () => {
+      
+
+
+    }
   }, []);
+
   return (
     <CalendarContext.Provider
       value={{

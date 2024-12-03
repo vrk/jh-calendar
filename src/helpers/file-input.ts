@@ -75,14 +75,13 @@ export async function getFabricImageFromElement(
   fullsizeImageElement: HTMLImageElement
 ): Promise<FabricImage> {
   const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
-  const { width, height } = getResizedDimensionsWithinBounds(
-    photoBounds,
-    fullsizeImageElement
-  );
+  const resizedImageData = resizeImage(fullsizeImageElement, photoBounds.width, photoBounds.height)
+  const resizedImageElement = await createImageElementWithSrc(resizedImageData?.data);
 
   const resizeFilter = new filters.Resize();
   resizeFilter.resizeType = "lanczos";
-  const fabricImage = new FabricImage(fullsizeImageElement, {
+
+  const fabricImage = new FabricImage(resizedImageElement, {
     selectable: false,
     filters: [resizeFilter],
   });
@@ -93,11 +92,11 @@ function resizeImage(
   imageElement: HTMLImageElement,
   maxWidth: number,
   maxHeight: number
-): RawImageData | null {
+): RawImageData {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) {
-    return null;
+    throw new Error("couldnt get canvas context")
   }
   // Start out unscaled
   canvas.width = imageElement.width;

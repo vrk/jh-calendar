@@ -20,7 +20,7 @@ import { FabricImage } from "fabric";
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
-  const { yearMonthInfo, calendarFunctions, croppedDateImages } =
+  const { yearMonthInfo, calendarFunctions, imagesByDateMap } =
     React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
@@ -34,10 +34,6 @@ function CalendarView() {
   const [selectedDayNumber, setSelectedDayNumber] = React.useState<
     number | null
   >(null);
-
-  const [loadedImagesCache, setLoadedImagesCache] = React.useState(
-    new Map<number, FullCroppedPhotoInfo>()
-  );
 
   React.useEffect(() => {
     if (!svgRoot.current) {
@@ -58,16 +54,15 @@ function CalendarView() {
     };
   }, [svgRoot, yearMonthInfo]);
   const numberDaysInMonth = getDaysInMonth(yearMonthInfo.firstDateOfMonth);
-  const daysInMonth = [];
+  const daysInMonth: Array<ValidDate> = [];
   for (let i = 1; i <= numberDaysInMonth; i++) {
-    daysInMonth.push(i);
+    daysInMonth.push(i as ValidDate);
   }
 
   const getFileForDay = async (dayInMonth: ValidDate) => {
     setIsCropDialogOpen(true);
 
-    const croppedImage = croppedDateImages.get(dayInMonth);
-    const fullInfo = loadedImagesCache.get(dayInMonth);
+    const fullInfo = imagesByDateMap.get(dayInMonth);
 
     if (fullInfo) {
       const fabricImage = await getFabricImageFromElement(fullInfo.fullImage);
@@ -105,13 +100,6 @@ function CalendarView() {
             selectedDayNumber as ValidDate,
             fullCroppedPhotoInfo
           );
-          setLoadedImagesCache(
-            new Map(loadedImagesCache).set(
-              selectedDayNumber,
-              fullCroppedPhotoInfo
-            )
-          );
-          console.log(loadedImagesCache);
         }}
         onOpenChange={(isOpen) => {
           setIsCropDialogOpen(isOpen);
@@ -126,9 +114,7 @@ function CalendarView() {
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
           {daysInMonth.map((today) => {
-            const loaded = loadedImagesCache.get(today);
-            console.log("rerendering");
-
+            const loaded = imagesByDateMap.get(today);
             return (
               <HobonichiCousinClickableDate
                 key={today}

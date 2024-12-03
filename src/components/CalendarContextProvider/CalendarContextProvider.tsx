@@ -17,6 +17,8 @@ import {
   saveYearMonthInfo,
   saveCroppedImageDataForDateDb,
   loadAllCroppedDataFromDb,
+  loadFullImageForDateDb,
+  saveFullImageDataForDateDb,
 } from "@/helpers/indexeddb";
 import React from "react";
 
@@ -26,9 +28,10 @@ type CalendarFunctions = {
     croppedImage: HTMLImageElement,
     metadata: CroppedPhotoMetadata
   ) => Promise<void>;
+  saveFullPhotoForDate: (date: ValidDate, fullImage: HTMLImageElement) => Promise<void>;
   removePhotoForDate: (date: ValidDate) => Promise<void>;
 
-  getFullCroppedPhotoInfoForDate: (date: ValidDate) => Promise<FullPhotoInfo>;
+  getFullCroppedPhotoInfoForDate: (date: ValidDate) => Promise<FullPhotoInfo|undefined>;
 
   setYearMonth: (yearMonth: string) => void;
 
@@ -55,6 +58,9 @@ export const CalendarContext = React.createContext<CalendarContextProvider>({
   croppedImagesByDateMap: new Map<ValidDate, CroppedPhotoInfo>(),
   calendarFunctions: {
     setPhotoForDate: async function (): Promise<void> {
+      throw new Error("Function not implemented.");
+    },
+    saveFullPhotoForDate: async function (): Promise<void> {
       throw new Error("Function not implemented.");
     },
     getFullCroppedPhotoInfoForDate: () => {
@@ -86,7 +92,7 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     () => new Map<ValidDate, CroppedPhotoInfo>(),
     []
   );
-  const imagesByDateMap = React.useMemo(
+  const fullImagesByDateCache = React.useMemo(
     () => new Map<ValidDate, FullPhotoInfo>(),
     []
   );
@@ -95,13 +101,27 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     setPhotoForDate: async function (
       date: ValidDate,
       croppedPhoto: HTMLImageElement,
-      metadata: CroppedPhotoMetadata
+      metadata: CroppedPhotoMetadata,
     ) {
       addPhotoToState(date, croppedPhoto, metadata);
       return saveCroppedImageDataForDateDb(date, croppedPhoto, metadata);
     },
+    saveFullPhotoForDate: async function (
+      date: ValidDate,
+      fullImage: HTMLImageElement
+    ) {
+      fullImagesByDateCache.set(date, { fullImage });
+      return saveFullImageDataForDateDb(date, { fullImage });
+    },
     getFullCroppedPhotoInfoForDate: async function (date: ValidDate) {
-      throw new Error("not implemented");
+      if (fullImagesByDateCache.has(date)) {
+        return fullImagesByDateCache.get(date);
+      }
+      const item = await loadFullImageForDateDb(date);
+      if (item) {
+        fullImagesByDateCache.set(date, item);
+      }
+      return item;
     },
     removePhotoForDate: async function (date: ValidDate) {
       throw new Error("Function not implemented.");
@@ -127,26 +147,26 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     forceUpdate();
   };
 
-  const initializeContext = () => {};
-
-  React.useEffect(() => {
-    console.log("LOADED", loadedStatus);
-    setLoadedStatus(LoadedStatus.Loading);
+  const initializeContext = async () => {
     if (loadedStatus === LoadedStatus.Loaded) {
       return;
     }
-    console.timeEnd();
-    console.time();
-    console.log("!!!starting request");
-    const onImageLoaded = (dayOfMonth: number, image: HTMLImageElement, metadata: CroppedPhotoMetadata) => {
+    const onImageLoaded = (
+      dayOfMonth: number,
+      image: HTMLImageElement,
+      metadata: CroppedPhotoMetadata
+    ) => {
       addPhotoToState(dayOfMonth as ValidDate, image, metadata);
     };
-    const onFinished = () => {
-      console.timeLog();
-      console.log("!!!! ending request");
-    };
+    const onFinished = () => {};
+    return loadAllCroppedDataFromDb(onImageLoaded, onFinished);
+  };
 
-    loadAllCroppedDataFromDb(onImageLoaded, onFinished);
+  React.useEffect(() => {
+    setLoadedStatus(LoadedStatus.Loading);
+    initializeContext().then(() => {
+      setLoadedStatus(LoadedStatus.Loaded);
+    });
   }, []);
 
   return (

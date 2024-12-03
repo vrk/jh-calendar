@@ -84,8 +84,8 @@ export async function saveCroppedImageDataForDateDb(
         height,
         width,
       },
-      metadata: {...metadata}
-    }
+      metadata: { ...metadata },
+    };
     const request = objectStore.put(newItem);
     request.onerror = (error) => {
       console.log(error);
@@ -116,7 +116,7 @@ export async function saveFullImageDataForDateDb(
         height,
         width,
       },
-    }
+    };
     const request = objectStore.put(newItem);
     request.onerror = (error) => {
       console.log(error);
@@ -129,10 +129,14 @@ export async function saveFullImageDataForDateDb(
 }
 
 export async function loadAllCroppedDataFromDb(
-  onImageLoaded: (dayOfMonth: number, image: HTMLImageElement, metadata: CroppedPhotoMetadata) => void,
+  onImageLoaded: (
+    dayOfMonth: number,
+    image: HTMLImageElement,
+    metadata: CroppedPhotoMetadata
+  ) => void,
   onFinished: () => void
 ) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {
     const db = await getDatabase();
     const transaction = db.transaction(CROPPED_IMAGE_STORE_NAME);
     const objectStore = transaction.objectStore(CROPPED_IMAGE_STORE_NAME);
@@ -148,6 +152,36 @@ export async function loadAllCroppedDataFromDb(
         cursor.continue();
       } else {
         onFinished();
+      }
+    };
+    request.onerror = () => {
+      reject("Could not get all data");
+    };
+    resolve();
+  });
+}
+
+export async function loadFullImageForDateDb(
+  dayOfMonth: ValidDate
+): Promise<FullPhotoInfo | undefined> {
+  return new Promise(async (resolve, reject) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(FULL_IMAGE_STORE_NAME);
+    const objectStore = transaction.objectStore(FULL_IMAGE_STORE_NAME);
+    const request = objectStore.get(dayOfMonth);
+    request.onsuccess = () => {
+      const item: FullCroppedPhotoRawData = request.result;
+      if (!item) {
+        resolve(undefined);
+      } else {
+        const image = new Image();
+        image.src = item.fullImageData.data;
+        image.width = item.fullImageData.width;
+        image.height = item.fullImageData.height;
+        const retrieved: FullPhotoInfo = {
+          fullImage: image,
+        };
+        resolve(retrieved);
       }
     };
     request.onerror = () => {

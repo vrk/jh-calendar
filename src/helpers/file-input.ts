@@ -26,7 +26,7 @@ export async function getFileFromFilePicker(
   });
 }
 
-async function createImageElement(file: File): Promise<HTMLImageElement> {
+export async function createImageElement(file: File): Promise<HTMLImageElement> {
   return createImageElementWithSrc(URL.createObjectURL(file));
 }
 

@@ -9,11 +9,13 @@ import { getYearMonthString } from "@/helpers/calendar-helpers";
 import { getDaysInMonth, setDay } from "date-fns";
 import CropModal from "../CropModal";
 import {
+  createImageElement,
   getFileFromFilePicker as getFileFromFilePicker,
   getImageFromFile,
   PhotoSelectionType,
 } from "@/helpers/file-input";
 import { FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
+import { getMaxReasonablePhotoSizeHobonichiCousin } from "@/helpers/print-helpers";
 
 const STATIC_CONTENT_ID = "static-conten";
 
@@ -65,8 +67,9 @@ function CalendarView() {
       return;
     }
     const file = files[0];
-    const loadedData = await getImageFromFile(file);
-    setImageToCrop(loadedData.imageElement);
+    // const loadedData = await getImageFromFile(file);
+    const fullsizeImageElement = await createImageElement(file);
+    setImageToCrop(fullsizeImageElement);
     setSelectedDayNumber(dayInMonth);
   };
 

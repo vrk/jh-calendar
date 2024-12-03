@@ -1,15 +1,4 @@
 "use client";
-import ShortUniqueId from "short-unique-id";
-import {
-  Journal,
-  JournalImage,
-  DBJournalImage,
-  Spread,
-  SpreadItem,
-  FabricJsMetadata,
-  PrintItem,
-  PrintPage,
-} from "./data-types";
 import { YearMonthInfo } from "./calendar-data-types";
 import { getYearMonthInfo } from "./calendar-helpers";
 

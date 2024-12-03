@@ -121,7 +121,7 @@ const CropModal = ({
           ]}
         ></DropdownSelect>
         <label>
-          Number boxes wide:
+          Width:
           <input
             type="range"
             step="0.5"
@@ -134,7 +134,7 @@ const CropModal = ({
           ></input>
         </label>
         <label>
-          Number boxes tall:
+          Height:
           <input
             type="range"
             step="0.5"
@@ -191,7 +191,6 @@ function CanvasWrapper({
       height: htmlCanvas.current.offsetHeight,
       uniformScaling: true,
       uniScaleKey: null,
-      backgroundColor: "lightgray",
     });
     setFabricCanvas(newlyMadeCanvas);
     return () => {

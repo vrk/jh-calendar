@@ -11,13 +11,17 @@ import {
 import { useHotkeys } from "react-hotkeys-hook";
 import { ClipPathInfo, RawImageData } from "@/helpers/calendar-data-types";
 import { createImageElementWithSrc } from "@/helpers/file-input";
+import {
+  getMaxReasonablePhotoSizeHobonichiCousin,
+  getResizedDimensionsWithinBounds,
+} from "@/helpers/print-helpers";
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,
   imageToCrop: HTMLImageElement | null,
   aspectRatio: number,
   setCroppedImage: (img: HTMLImageElement, clipaPathInfo: ClipPathInfo) => void,
-  startingClipPathInfo: ClipPathInfo | null,
+  startingClipPathInfo: ClipPathInfo | null
 ) {
   const rectangle = new Rect({
     fill: "transparent",
@@ -46,8 +50,16 @@ function useCropPhoto(
     if (!fabricCanvas || !imageToCrop) {
       return;
     }
+    const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
+    const { width, height } = getResizedDimensionsWithinBounds(
+      photoBounds,
+      imageToCrop
+    );
+
     const fabricImage = new FabricImage(imageToCrop, {
       selectable: false,
+      width,
+      height,
     });
     const scale = util.findScaleToFit(fabricImage, fabricCanvas);
     fabricImage.scale(scale);
@@ -87,7 +99,7 @@ function useCropPhoto(
         top: rectangle.top,
         left: rectangle.left,
         height: rectangle.getScaledHeight(),
-        width: rectangle.getScaledWidth()
+        width: rectangle.getScaledWidth(),
       });
     };
     updateCroppedImageData();

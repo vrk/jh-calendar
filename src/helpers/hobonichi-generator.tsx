@@ -324,23 +324,12 @@ export function DateSquarePreview(
     props.boundingBox === "square"
       ? style.boundingSquare
       : style.boundingWritable;
-  const [isRefVisible, setIsRefVisible] = React.useState(false);
 
-  React.useEffect(() => {
-    console.log("rerendering", props.dateNumber);
-    if (!imageContainerRoot.current) {
-      return;
-    }
-    const remove = addImage(imageContainerRoot.current, props);
-    return remove;
-  }, [isRefVisible]);
   return (
     <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
       <div
         ref={(el) => {
-          console.log("HERE", props.dateNumber, el);
           imageContainerRoot.current = el;
-          setIsRefVisible(!!el);
           if (el) {
             el.innerHTML = '';
             addImage(el, props);
@@ -365,7 +354,6 @@ function addImage(
   }: DateSquarePreviewProps
 ) {
   if (!el || !previewImage || !dateNumber) {
-    console.log("EARLY RETURN", dateNumber, previewImage, el);
     return;
   }
 
@@ -386,15 +374,6 @@ function addImage(
   el.append(previewImage);
   previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
   previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
-  console.log("adding back", previewImage.id);
-  return () => {
-    if (!el) {
-      return;
-    }
-    const added = el.querySelector(`#${previewImage.id}`);
-    added?.remove();
-    console.log("removing!!!!!!", previewImage.id);
-  };
 }
 
 function createSixthRowDateSquare(

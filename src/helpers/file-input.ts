@@ -105,20 +105,20 @@ function resizeImage(
     throw new Error("couldnt get canvas context");
   }
   // Start out unscaled
-  canvas.width = imageElement.width;
-  canvas.height = imageElement.height;
+  canvas.width = imageElement.naturalWidth;
+  canvas.height = imageElement.naturalHeight;
 
   // Scale if too wide
-  if (maxWidth < imageElement.width) {
+  if (maxWidth < imageElement.naturalWidth) {
     canvas.width = maxWidth;
-    const scale = maxWidth / imageElement.width;
-    canvas.height = imageElement.height * scale;
+    const scale = maxWidth / imageElement.naturalWidth;
+    canvas.height = imageElement.naturalHeight * scale;
   }
   // Scale more if too tall
-  if (maxHeight < imageElement.height) {
+  if (maxHeight < imageElement.naturalHeight) {
     canvas.height = maxHeight;
-    const scale = maxHeight / imageElement.height;
-    canvas.width = imageElement.width * scale;
+    const scale = maxHeight / imageElement.naturalHeight;
+    canvas.width = imageElement.naturalWidth * scale;
   }
 
   context.imageSmoothingEnabled = true;

@@ -71,11 +71,12 @@ export async function saveImageDataForDateDb(
 
     const rawImageData = croppedPhotoToRawData(imageData);
 
-    const request = objectStore.add({
+    const request = objectStore.put({
       id: dayOfMonth,
       rawImageData,
     });
-    request.onerror = () => {
+    request.onerror = (error) => {
+      console.log(error);
       reject(`Could not create object with id: ${dayOfMonth}`);
     };
     request.onsuccess = () => {

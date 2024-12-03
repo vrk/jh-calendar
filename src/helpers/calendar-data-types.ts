@@ -38,8 +38,8 @@ function elementToData(img: HTMLImageElement) {
   if (!context) {
     throw new Error("can't get context");
   }
-  canvas.width = img.width;
-  canvas.height = img.height;
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
   context.drawImage(img, 0, 0);
   return canvas.toDataURL();
 }

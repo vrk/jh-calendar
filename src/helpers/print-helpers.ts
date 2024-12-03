@@ -17,8 +17,8 @@ export function getMaxReasonablePhotoSize(
 
 export function getMaxReasonablePhotoSizeHobonichiCousin(): PhotoSize {
   return getMaxReasonablePhotoSize(
-    5.8 * 2,
-    8.3
+    5,
+    5
   )
 }
 

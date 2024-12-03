@@ -75,8 +75,22 @@ export async function getFabricImageFromElement(
   fullsizeImageElement: HTMLImageElement
 ): Promise<FabricImage> {
   const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
-  const resizedImageData = resizeImage(fullsizeImageElement, photoBounds.width, photoBounds.height)
-  const resizedImageElement = await createImageElementWithSrc(resizedImageData?.data);
+  console.timeEnd();
+  console.time();
+  console.log("start");
+  console.timeLog();
+  const resizedImageData = resizeImage(
+    fullsizeImageElement,
+    photoBounds.width,
+    photoBounds.height
+  );
+  console.log("resized image");
+  console.timeLog();
+  const resizedImageElement = await createImageElementWithSrc(
+    resizedImageData?.data
+  );
+  console.log("created image");
+  console.timeLog();
 
   const resizeFilter = new filters.Resize();
   resizeFilter.resizeType = "lanczos";
@@ -85,6 +99,14 @@ export async function getFabricImageFromElement(
     selectable: false,
     filters: [resizeFilter],
   });
+  console.log(
+    "created fabricjs image",
+    fabricImage.height,
+    fabricImage.width,
+    fullsizeImageElement.height,
+    fullsizeImageElement.width
+  );
+  console.timeLog();
   return fabricImage;
 }
 
@@ -96,7 +118,7 @@ function resizeImage(
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) {
-    throw new Error("couldnt get canvas context")
+    throw new Error("couldnt get canvas context");
   }
   // Start out unscaled
   canvas.width = imageElement.width;

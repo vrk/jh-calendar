@@ -55,12 +55,8 @@ function useCropPhoto(
     if (!fabricCanvas || !fabricImage) {
       return;
     }
-    console.log("start use effect")
-    console.timeLog();
     const scale = util.findScaleToFit(fabricImage, fabricCanvas);
     fabricImage.scale(scale);
-    console.log("finish scale")
-    console.timeLog();
     fabricCanvas.add(fabricImage);
     fabricCanvas.centerObject(fabricImage);
     fabricCanvas.add(cropRect);
@@ -77,8 +73,6 @@ function useCropPhoto(
     fabricCanvas.requestRenderAll();
 
     updateCroppedImageData();
-    console.log("finish update cropp")
-    console.timeLog();
 
     const onObjectModified = async (e: any) => {
       if (e.target !== cropRect) {
@@ -99,9 +93,6 @@ function useCropPhoto(
       fabricCanvas.requestRenderAll();
     };
     fabricCanvas.on("object:moving", onMove);
-
-    console.log("finish use effect")
-    console.timeLog();
 
     return () => {
       fabricCanvas.remove(fabricImage);

@@ -1,3 +1,5 @@
+import PhotoTray from "@/components/PhotoTray";
+
 export type YearMonthInfo = {
   calMonth: number; // 0-index based
   calYear: number;
@@ -13,18 +15,55 @@ export type RawImageData = {
   data: string;
   height: number;
   width: number;
-}
+};
 
 export type BoundingBoxValue = "square" | "writable-space";
 
 export type FullCroppedPhotoInfo = {
-  fullImage: HTMLImageElement,
-  croppedImage: HTMLImageElement,
-  metadata: CroppedPhotoMetadata
+  fullImage: HTMLImageElement;
+  croppedImage: HTMLImageElement;
+  metadata: CroppedPhotoMetadata;
+};
+
+export type FullCroppedPhotoRawData = {
+  fullImageData: RawImageData;
+  croppedImageData: RawImageData;
+  metadata: CroppedPhotoMetadata;
+};
+
+function elementToData(img: HTMLImageElement) {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("can't get context");
+  }
+  canvas.width = img.width;
+  canvas.height = img.height;
+  context.drawImage(img, 0, 0);
+  return canvas.toDataURL();
+}
+
+export function croppedPhotoToRawData(
+  photoInfo: FullCroppedPhotoInfo
+): FullCroppedPhotoRawData {
+  const converted: FullCroppedPhotoRawData = {
+    fullImageData: {
+      data: elementToData(photoInfo.fullImage),
+      height: photoInfo.fullImage.height,
+      width: photoInfo.fullImage.width,
+    },
+    croppedImageData: {
+      data: elementToData(photoInfo.croppedImage),
+      height: photoInfo.croppedImage.height,
+      width: photoInfo.croppedImage.width,
+    },
+    metadata: { ...photoInfo.metadata },
+  };
+  return converted;
 }
 
 export type CroppedPhotoMetadata = {
-  clipPathInfo: ClipPathInfo
+  clipPathInfo: ClipPathInfo;
   boundingBox: BoundingBoxValue;
   squaresWide: number;
   squaresTall: number;
@@ -35,7 +74,7 @@ export type ClipPathInfo = {
   left: number;
   height: number;
   width: number;
-}
+};
 
 export type ValidDate =
   | 1

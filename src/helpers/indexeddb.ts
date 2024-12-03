@@ -1,5 +1,5 @@
 "use client";
-import { YearMonthInfo } from "./calendar-data-types";
+import { croppedPhotoToRawData, FullCroppedPhotoInfo, YearMonthInfo } from "./calendar-data-types";
 import { getYearMonthInfo } from "./calendar-helpers";
 
 //
@@ -7,12 +7,7 @@ import { getYearMonthInfo } from "./calendar-helpers";
 //
 const DATABASE_NAME = "December2024CalendarHelperDb";
 
-const FULL_IMAGE_STORE_NAME = "FullImages";
-const CROPPED_PHOTO_STORE_NAME = "CroppedDatePhoto";
-
-const CROPPED_TO_FULL_INDEX_NAME = "CroppedToFull";
-
-const FULL_INDEX_KEY_NAME = "fullImageId";
+const CALENDAR_IMAGE_STORE_NAME = "FullImages";
 
 //
 // Other constants
@@ -49,19 +44,33 @@ export async function getDatabase(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
 
-      db.createObjectStore(FULL_IMAGE_STORE_NAME, { keyPath: "id" });
-
-      const croppedStore = db.createObjectStore(CROPPED_PHOTO_STORE_NAME, {
-        keyPath: "dayOfMonth",
-      });
-      croppedStore.createIndex(CROPPED_TO_FULL_INDEX_NAME, FULL_INDEX_KEY_NAME, {
-        unique: false,
-      });
+      db.createObjectStore(CALENDAR_IMAGE_STORE_NAME, { keyPath: "id" });
     };
 
     request.onsuccess = () => {
       const db = request.result;
       resolve(db);
+    };
+  });
+}
+
+export async function saveImageDataForDateDb(dayOfMonth: number, imageData: FullCroppedPhotoInfo): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME, "readwrite");
+    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
+
+    const rawImageData = croppedPhotoToRawData(imageData);
+
+    const request = objectStore.add({
+      id: dayOfMonth,
+      rawImageData
+    });
+    request.onerror = () => {
+      reject(`Could not create object with id: ${dayOfMonth}`);
+    };
+    request.onsuccess = () => {
+      resolve();
     };
   });
 }

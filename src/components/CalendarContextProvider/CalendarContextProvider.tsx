@@ -7,20 +7,24 @@ import {
   ValidDate,
   YearMonthInfo,
 } from "@/helpers/calendar-data-types";
-import { getTodaysYearMonthInfo, getYearMonthInfo } from "@/helpers/calendar-helpers";
-import { loadYearMonthInfo, saveYearMonthInfo } from "@/helpers/indexeddb";
+import {
+  getTodaysYearMonthInfo,
+  getYearMonthInfo,
+} from "@/helpers/calendar-helpers";
+import {
+  loadYearMonthInfo,
+  saveYearMonthInfo,
+  saveImageDataForDateDb,
+} from "@/helpers/indexeddb";
 import React from "react";
 
 type CalendarFunctions = {
-  setPhotoForDate: (
-      date: ValidDate,
-      photoInfo: FullCroppedPhotoInfo
-  ) => void;
-  removePhotoForDate: (date: ValidDate) => void;
+  setPhotoForDate: (date: ValidDate, photoInfo: FullCroppedPhotoInfo) => Promise<void>;
+  removePhotoForDate: (date: ValidDate) => Promise<void>;
 
   setYearMonth: (yearMonth: string) => void;
 
-  clearCalendar: () => void;
+  clearCalendar: () => Promise<void>;
 };
 
 type CalendarContextProvider = {
@@ -42,18 +46,21 @@ export const CalendarContext = React.createContext<CalendarContextProvider>({
   yearMonthInfo: getTodaysYearMonthInfo(),
   imagesByDateMap: new Map<ValidDate, FullCroppedPhotoInfo>(),
   calendarFunctions: {
-    setPhotoForDate: function (date: ValidDate, photoInfo: FullCroppedPhotoInfo): void {
+    setPhotoForDate: async function (
+      date: ValidDate,
+      photoInfo: FullCroppedPhotoInfo
+    ): Promise<void> {
       throw new Error("Function not implemented.");
     },
-    removePhotoForDate: function (date: ValidDate): void {
+    removePhotoForDate: async function (date: ValidDate) {
       throw new Error("Function not implemented.");
     },
     setYearMonth: function (yearMonth: string): void {
       throw new Error("Function not implemented.");
     },
-    clearCalendar: function (): void {
+    clearCalendar: async function () {
       throw new Error("Function not implemented.");
-    }
+    },
   },
 });
 
@@ -70,31 +77,29 @@ const CalendarContextProvider = ({ children }: React.PropsWithChildren) => {
     new Map<ValidDate, FullCroppedPhotoInfo>()
   );
 
-  console.log('creating new map');
-
   const calendarFunctions: CalendarFunctions = {
-    setPhotoForDate: function (
+    setPhotoForDate: async function (
       date: ValidDate,
       fullCroppedPhotoInfo: FullCroppedPhotoInfo
-    ): void {
+    ) {
       const newMap = new Map(imagesByDateMap).set(date, fullCroppedPhotoInfo);
       setImagesByDateMap(newMap);
+
+      return saveImageDataForDateDb(date, fullCroppedPhotoInfo);
     },
-    removePhotoForDate: function (date: ValidDate): void {
+    removePhotoForDate: async function (date: ValidDate) {
       throw new Error("Function not implemented.");
     },
     setYearMonth: function (yearMonth: string): void {
       saveYearMonthInfo(yearMonth);
       setYearMonthInfoState(getYearMonthInfo(yearMonth));
     },
-    clearCalendar: function (): void {
+    clearCalendar: async function () {
       throw new Error("Function not implemented.");
     },
   };
 
-  const initializeContext = async () => {
-
-  };
+  const initializeContext = async () => {};
 
   React.useEffect(() => {
     setLoadedStatus(LoadedStatus.Loading);

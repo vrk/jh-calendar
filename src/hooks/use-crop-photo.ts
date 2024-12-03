@@ -20,7 +20,7 @@ function useCropPhoto(
   setCroppedImage: (img: HTMLImageElement, clipaPathInfo: ClipPathInfo) => void,
   startingCropMetadata: CroppedPhotoMetadata | null
 ) {
-  const [cropRect] = React.useState(createCropRectangle(startingCropMetadata))
+  const [cropRect, setCropRect] = React.useState(createCropRectangle())
 
   const updateCroppedImageData = async () => {
     if (!fabricCanvas) {
@@ -63,6 +63,11 @@ function useCropPhoto(
     cropRect.setCoords();
     if (!startingCropMetadata?.clipPathInfo) {
       updateCropToAspectRatio(fabricCanvas, fabricImage, cropRect, aspectRatio);
+    } else {
+      cropRect.height = startingCropMetadata.clipPathInfo.height;
+      cropRect.width = startingCropMetadata.clipPathInfo.width;
+      cropRect.top = startingCropMetadata.clipPathInfo.top;
+      cropRect.left = startingCropMetadata.clipPathInfo.left;
     }
     fabricCanvas.setActiveObject(cropRect);
     fabricCanvas.requestRenderAll();
@@ -95,7 +100,7 @@ function useCropPhoto(
       fabricCanvas.off("object:moving", onMove);
       fabricCanvas.off("object:scaling", onObjectModified);
     };
-  }, [fabricCanvas, fabricImage]);
+  }, [fabricCanvas, fabricImage, startingCropMetadata]);
 
   React.useEffect(() => {
     if (!fabricCanvas || !fabricImage) {
@@ -106,7 +111,7 @@ function useCropPhoto(
   }, [aspectRatio])
 }
 
-function createCropRectangle(startingCropMetadata: CroppedPhotoMetadata | null) {
+function createCropRectangle() {
   const rectangle = new Rect({
     fill: "transparent",
     strokeUniform: true,
@@ -120,10 +125,6 @@ function createCropRectangle(startingCropMetadata: CroppedPhotoMetadata | null) 
     lockSkewingY: true,
     transparentCorners: false,
     visible: true,
-    height: startingCropMetadata?.clipPathInfo?.height,
-    width: startingCropMetadata?.clipPathInfo?.width,
-    top: startingCropMetadata?.clipPathInfo?.top,
-    left: startingCropMetadata?.clipPathInfo?.left,
   });
   rectangle.id = "--crop-rectangle--";
   rectangle.controls.mt.setVisibility(false, "", rectangle);

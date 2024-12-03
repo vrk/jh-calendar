@@ -1,5 +1,9 @@
+import { FabricImage, filters } from "fabric";
 import { RawImageData } from "./calendar-data-types";
-import { getMaxReasonablePhotoSizeHobonichiCousin } from "./print-helpers";
+import {
+  getMaxReasonablePhotoSizeHobonichiCousin,
+  getResizedDimensionsWithinBounds,
+} from "./print-helpers";
 
 export enum PhotoSelectionType {
   Single,
@@ -26,11 +30,15 @@ export async function getFileFromFilePicker(
   });
 }
 
-export async function createImageElement(file: File): Promise<HTMLImageElement> {
+export async function createImageElement(
+  file: File
+): Promise<HTMLImageElement> {
   return createImageElementWithSrc(URL.createObjectURL(file));
 }
 
-export async function createImageElementWithSrc(src: string): Promise<HTMLImageElement> {
+export async function createImageElementWithSrc(
+  src: string
+): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const image = new Image();
     image.addEventListener("load", function () {
@@ -56,6 +64,25 @@ export async function getImageFromFile(file: File): Promise<LoadedImage> {
     imageElement: resizedImageElement,
     rawData: scaledImage,
   };
+}
+
+export async function getFabricImageFromFile(file: File): Promise<FabricImage> {
+  const fullsizeImageElement = await createImageElement(file);
+  const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
+  const { width, height } = getResizedDimensionsWithinBounds(
+    photoBounds,
+    fullsizeImageElement
+  );
+
+  const resizeFilter = new filters.Resize();
+  resizeFilter.resizeType = "lanczos";
+  const fabricImage = new FabricImage(fullsizeImageElement, {
+    selectable: false,
+    width,
+    height,
+    filters: [resizeFilter],
+  });
+  return fabricImage;
 }
 
 function resizeImage(

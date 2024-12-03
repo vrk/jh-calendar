@@ -18,7 +18,7 @@ import {
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,
-  imageToCrop: HTMLImageElement | null,
+  fabricImage: FabricImage | null,
   aspectRatio: number,
   setCroppedImage: (img: HTMLImageElement, clipaPathInfo: ClipPathInfo) => void,
   startingClipPathInfo: ClipPathInfo | null
@@ -47,20 +47,9 @@ function useCropPhoto(
   rectangle.controls.mr.setVisibility(false, "", rectangle);
 
   React.useEffect(() => {
-    if (!fabricCanvas || !imageToCrop) {
+    if (!fabricCanvas || !fabricImage) {
       return;
     }
-    const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
-    const { width, height } = getResizedDimensionsWithinBounds(
-      photoBounds,
-      imageToCrop
-    );
-
-    const fabricImage = new FabricImage(imageToCrop, {
-      selectable: false,
-      width,
-      height,
-    });
     const scale = util.findScaleToFit(fabricImage, fabricCanvas);
     fabricImage.scale(scale);
     fabricCanvas.add(fabricImage);
@@ -130,7 +119,7 @@ function useCropPhoto(
       fabricCanvas.off("object:moving", onMove);
       fabricCanvas.off("object:scaling", onObjectModified);
     };
-  }, [fabricCanvas, imageToCrop, aspectRatio]);
+  }, [fabricCanvas, fabricImage, aspectRatio]);
 }
 
 function clampSizeToBounds(bounds: FabricImage, movingObject: FabricObject) {
@@ -177,15 +166,6 @@ function clampLocationToBounds(
   }
 
   movingObject.setCoords();
-}
-
-function getClientPosition(e: any) {
-  const positionSource = e.touches ? e.touches[0] : e;
-  const { clientX, clientY } = positionSource;
-  return {
-    clientX,
-    clientY,
-  };
 }
 
 export default useCropPhoto;

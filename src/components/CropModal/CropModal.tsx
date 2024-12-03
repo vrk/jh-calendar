@@ -1,6 +1,6 @@
 import * as React from "react";
 import styles from "./CropModal.module.css";
-import { Canvas } from "fabric";
+import { Canvas, FabricImage } from "fabric";
 import useCropPhoto from "@/hooks/use-crop-photo";
 import ConfirmationDialog from "../ConfirmationDialog";
 import {
@@ -156,7 +156,7 @@ const CropModal = ({
 };
 
 type WrapperProps = {
-  imageToCrop: HTMLImageElement | null;
+  imageToCrop: FabricImage | null;
   aspectRatio: number;
   startingClipPathInfo: ClipPathInfo | null;
   setPreviewImage: (

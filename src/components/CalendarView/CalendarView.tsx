@@ -9,13 +9,12 @@ import { getYearMonthString } from "@/helpers/calendar-helpers";
 import { getDaysInMonth, setDay } from "date-fns";
 import CropModal from "../CropModal";
 import {
-  createImageElement,
+  getFabricImageFromFile,
   getFileFromFilePicker as getFileFromFilePicker,
-  getImageFromFile,
   PhotoSelectionType,
 } from "@/helpers/file-input";
 import { FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
-import { getMaxReasonablePhotoSizeHobonichiCousin } from "@/helpers/print-helpers";
+import { FabricImage } from "fabric";
 
 const STATIC_CONTENT_ID = "static-conten";
 
@@ -25,7 +24,7 @@ function CalendarView() {
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
   const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
-  const [imageToCrop, setImageToCrop] = React.useState<HTMLImageElement | null>(
+  const [imageToCrop, setImageToCrop] = React.useState<FabricImage | null>(
     null
   );
   const [selectedDayNumber, setSelectedDayNumber] = React.useState<
@@ -67,9 +66,8 @@ function CalendarView() {
       return;
     }
     const file = files[0];
-    // const loadedData = await getImageFromFile(file);
-    const fullsizeImageElement = await createImageElement(file);
-    setImageToCrop(fullsizeImageElement);
+    const fabricImage = await getFabricImageFromFile(file);
+    setImageToCrop(fabricImage);
     setSelectedDayNumber(dayInMonth);
   };
 
@@ -84,7 +82,7 @@ function CalendarView() {
             return;
           }
           const fullCroppedPhotoInfo: FullCroppedPhotoInfo = {
-            fullImage: imageToCrop,
+            fullImage: imageToCrop._element as HTMLImageElement,
             croppedImage: croppedImage,
             metadata: croppedpHotoMetadata,
           };
@@ -113,11 +111,11 @@ function CalendarView() {
         <svg ref={svgRoot}>
           {daysInMonth.map((today) => {
             const loaded = loadedImagesCache.get(today);
-            console.log('rerendering');
+            console.log("rerendering");
 
             return (
               <HobonichiCousinClickableDate
-              key={today}
+                key={today}
                 dayInMonth={today}
                 yearMonthInfo={yearMonthInfo}
                 fullCroppedPhotoInfo={loaded ? { ...loaded } : null}

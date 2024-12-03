@@ -363,17 +363,17 @@ function addImage(
     dateNumber
   );
   const maxBounds = getDateSquareBoundsForDate(selectedDate);
-  el.style.width = `${maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX}px`;
+  el.style.width = `${Math.round(maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX)}px`;
   const maxBoxesTall =
     boundingBox === "square"
       ? maxBounds.totalBoxesTallWholeSquare
       : maxBounds.totalBoxesTallWritable;
-  el.style.height = `${maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX}px`;
+  el.style.height = `${Math.round(maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX)}px`;
 
   previewImage.id = `${uniqueid}--preview-image--${dateNumber}`;
   el.append(previewImage);
-  previewImage.width = cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX;
-  previewImage.height = cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX;
+  previewImage.width = Math.round(cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX);
+  previewImage.height = Math.round(cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX);
 }
 
 function createSixthRowDateSquare(

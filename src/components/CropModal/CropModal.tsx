@@ -193,6 +193,7 @@ function CanvasWrapper({
       height: htmlCanvas.current.offsetHeight,
       uniformScaling: true,
       uniScaleKey: null,
+      backgroundColor: "gray"
     });
     setFabricCanvas(newlyMadeCanvas);
     return () => {

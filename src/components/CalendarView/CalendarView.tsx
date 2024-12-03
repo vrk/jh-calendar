@@ -118,6 +118,7 @@ function CalendarView() {
           if (!isOpen) {
             setImageToCrop(null);
             setSelectedDayNumber(null);
+            setStartingCropMetadata(null);
           }
         }}
         imageToCrop={imageToCrop}

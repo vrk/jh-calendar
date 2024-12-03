@@ -84,8 +84,6 @@ export async function getFabricImageFromElement(
   resizeFilter.resizeType = "lanczos";
   const fabricImage = new FabricImage(fullsizeImageElement, {
     selectable: false,
-    width,
-    height,
     filters: [resizeFilter],
   });
   return fabricImage;

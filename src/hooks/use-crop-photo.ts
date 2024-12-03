@@ -8,8 +8,13 @@ import {
   TPointerEventInfo,
   util,
 } from "fabric";
-import { ClipPathInfo, CroppedPhotoMetadata, RawImageData } from "@/helpers/calendar-data-types";
+import {
+  ClipPathInfo,
+  CroppedPhotoMetadata,
+  RawImageData,
+} from "@/helpers/calendar-data-types";
 import { createImageElementWithSrc } from "@/helpers/file-input";
+import { max } from "date-fns/fp";
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,
@@ -50,14 +55,16 @@ function useCropPhoto(
     fabricCanvas.add(fabricImage);
     fabricCanvas.centerObject(fabricImage);
     fabricCanvas.add(rectangle);
+    rectangle.setCoords();
     if (!startingCropMetadata?.clipPathInfo) {
       const cropRectStartingWidth = fabricImage.getScaledWidth();
       const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
       rectangle.width = cropRectStartingWidth;
       rectangle.height = cropRectStartingHeight;
+      rectangle.setCoords();
+      clampSizeToBounds(fabricImage, rectangle);
       fabricCanvas.centerObject(rectangle);
     }
-    clampSizeToBounds(fabricImage, rectangle);
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 
@@ -120,11 +127,29 @@ function useCropPhoto(
 function clampSizeToBounds(bounds: FabricImage, movingObject: FabricObject) {
   const maxWidth = bounds.getScaledWidth();
   const maxHeight = bounds.getScaledHeight();
-  if (movingObject.getScaledHeight() > maxHeight) {
+
+  // TODO check whether scaling happened - seems like a FabricJS bug
+
+  const widthToCheck =
+    movingObject.scaleX === 1
+      ? movingObject.width
+      : movingObject.getScaledWidth();
+  const heightToCheck =
+    movingObject.scaleY === 1
+      ? movingObject.height
+      : movingObject.getScaledHeight();
+
+  if (heightToCheck > maxHeight) {
     movingObject.scaleToHeight(maxHeight);
-    console.log("scaling height");
+    console.log(
+      "scaling height",
+      heightToCheck,
+      maxHeight,
+      bounds.getScaledHeight(),
+      movingObject.getScaledHeight()
+    );
   }
-  if (movingObject.getScaledWidth() > maxWidth) {
+  if (widthToCheck > maxWidth) {
     movingObject.scaleToWidth(maxWidth);
     console.log(
       "scaling width",

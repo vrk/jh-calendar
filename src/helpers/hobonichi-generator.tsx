@@ -712,6 +712,7 @@ export function HobonichiCousinClickableDate({
           cropNumberBoxesWide={fullCroppedPhotoInfo.metadata.squaresWide}
           cropNumberBoxesTall={fullCroppedPhotoInfo.metadata.squaresTall}
           uniqueid="calendar-preview"
+          onClick={onClick}
         ></DateSquarePreview>
       </svg>
     );

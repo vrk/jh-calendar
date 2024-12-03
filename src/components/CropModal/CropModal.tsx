@@ -25,7 +25,7 @@ type Props = {
     fullCroppedPhotoInfo: CroppedPhotoMetadata
   ) => void;
   onOpenChange: (isOpen: boolean) => void;
-  imageToCrop: HTMLImageElement | null;
+  imageToCrop: FabricImage | null;
 };
 
 const CropModal = ({

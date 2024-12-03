@@ -77,14 +77,14 @@ function CalendarView() {
         isOpen={isCropDialogOpen}
         dateNumber={selectedDayNumber}
         yearMonthInfo={yearMonthInfo}
-        onConfirm={(croppedImage, croppedpHotoMetadata) => {
+        onConfirm={(croppedImage, croppedPhotoMetadata) => {
           if (!selectedDayNumber || !imageToCrop) {
             return;
           }
           const fullCroppedPhotoInfo: FullCroppedPhotoInfo = {
             fullImage: imageToCrop._element as HTMLImageElement,
             croppedImage: croppedImage,
-            metadata: croppedpHotoMetadata,
+            metadata: croppedPhotoMetadata,
           };
           calendarFunctions.setPhotoForDate(
             selectedDayNumber as ValidDate,

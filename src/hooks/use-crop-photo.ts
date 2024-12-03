@@ -8,13 +8,8 @@ import {
   TPointerEventInfo,
   util,
 } from "fabric";
-import { useHotkeys } from "react-hotkeys-hook";
 import { ClipPathInfo, RawImageData } from "@/helpers/calendar-data-types";
 import { createImageElementWithSrc } from "@/helpers/file-input";
-import {
-  getMaxReasonablePhotoSizeHobonichiCousin,
-  getResizedDimensionsWithinBounds,
-} from "@/helpers/print-helpers";
 
 function useCropPhoto(
   fabricCanvas: Canvas | null,

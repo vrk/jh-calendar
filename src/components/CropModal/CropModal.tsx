@@ -38,8 +38,9 @@ const CropModal = ({
   imageToCrop,
   startingCropMetadata,
 }: React.PropsWithChildren<Props>) => {
-  const [boundingBox, setBoundingBox] =
-    React.useState<BoundingBoxValue>(startingCropMetadata?.boundingBox || "writable-space");
+  const [boundingBox, setBoundingBox] = React.useState<BoundingBoxValue>(
+    startingCropMetadata?.boundingBox || "writable-space"
+  );
   const [previewImage, setPreviewImage] =
     React.useState<HTMLImageElement | null>(null);
   const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo | null>(
@@ -110,6 +111,12 @@ const CropModal = ({
           value={boundingBox}
           onValueChanged={function (value: BoundingBoxValue): void {
             setBoundingBox(value);
+            if (
+              value === "writable-space" &&
+              cropNumberBoxesTall > bounds.totalBoxesTallWritable
+            ) {
+              setCropNumberBoxesTall(bounds.totalBoxesTallWritable);
+            }
           }}
           optionList={[
             {
@@ -193,7 +200,7 @@ function CanvasWrapper({
       height: htmlCanvas.current.offsetHeight,
       uniformScaling: true,
       uniScaleKey: null,
-      backgroundColor: "gray"
+      backgroundColor: "gray",
     });
     setFabricCanvas(newlyMadeCanvas);
     return () => {

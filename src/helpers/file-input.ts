@@ -68,6 +68,12 @@ export async function getImageFromFile(file: File): Promise<LoadedImage> {
 
 export async function getFabricImageFromFile(file: File): Promise<FabricImage> {
   const fullsizeImageElement = await createImageElement(file);
+  return getFabricImageFromElement(fullsizeImageElement);
+}
+
+export async function getFabricImageFromElement(
+  fullsizeImageElement: HTMLImageElement
+): Promise<FabricImage> {
   const photoBounds = getMaxReasonablePhotoSizeHobonichiCousin();
   const { width, height } = getResizedDimensionsWithinBounds(
     photoBounds,

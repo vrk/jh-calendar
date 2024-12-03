@@ -315,6 +315,7 @@ type DateSquarePreviewProps = {
   cropNumberBoxesWide: number;
   cropNumberBoxesTall: number;
   uniqueid: string;
+  onClick?: () => void;
 };
 export function DateSquarePreview(
   props: React.PropsWithRef<DateSquarePreviewProps>
@@ -328,14 +329,17 @@ export function DateSquarePreview(
   return (
     <foreignObject className={`${style.foreignObject} ${boundingClass}`}>
       <div
+        onClick={props.onClick}
         ref={(el) => {
           imageContainerRoot.current = el;
           if (el) {
-            el.innerHTML = '';
+            el.innerHTML = "";
             addImage(el, props);
           }
         }}
-        className={`${style.photoPreviewContainer} ${boundingClass}`}
+        className={`${style.photoPreviewContainer} ${boundingClass} ${
+          props.onClick ? style.clickable : ""
+        }`}
       ></div>
     </foreignObject>
   );
@@ -363,17 +367,25 @@ function addImage(
     dateNumber
   );
   const maxBounds = getDateSquareBoundsForDate(selectedDate);
-  el.style.width = `${Math.round(maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX)}px`;
+  el.style.width = `${Math.round(
+    maxBounds.totalBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
+  )}px`;
   const maxBoxesTall =
     boundingBox === "square"
       ? maxBounds.totalBoxesTallWholeSquare
       : maxBounds.totalBoxesTallWritable;
-  el.style.height = `${Math.round(maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX)}px`;
+  el.style.height = `${Math.round(
+    maxBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
+  )}px`;
 
   previewImage.id = `${uniqueid}--preview-image--${dateNumber}`;
   el.append(previewImage);
-  previewImage.width = Math.round(cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX);
-  previewImage.height = Math.round(cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX);
+  previewImage.width = Math.round(
+    cropNumberBoxesWide * NUMBER_PIXELS_PER_GRID_BOX
+  );
+  previewImage.height = Math.round(
+    cropNumberBoxesTall * NUMBER_PIXELS_PER_GRID_BOX
+  );
 }
 
 function createSixthRowDateSquare(

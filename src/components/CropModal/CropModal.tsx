@@ -26,6 +26,7 @@ type Props = {
   ) => void;
   onOpenChange: (isOpen: boolean) => void;
   imageToCrop: FabricImage | null;
+  startingCropMetadata: CroppedPhotoMetadata | null;
 };
 
 const CropModal = ({
@@ -35,9 +36,10 @@ const CropModal = ({
   onConfirm,
   onOpenChange,
   imageToCrop,
+  startingCropMetadata,
 }: React.PropsWithChildren<Props>) => {
   const [boundingBox, setBoundingBox] =
-    React.useState<BoundingBoxValue>("writable-space");
+    React.useState<BoundingBoxValue>(startingCropMetadata?.boundingBox || "writable-space");
   const [previewImage, setPreviewImage] =
     React.useState<HTMLImageElement | null>(null);
   const [clipPathInfo, setClipPathInfo] = React.useState<ClipPathInfo | null>(
@@ -52,10 +54,10 @@ const CropModal = ({
   const bounds = getDateSquareBoundsForDate(selectedDate);
 
   const [cropNumberBoxesWide, setCropNumberBoxesWide] = React.useState(
-    bounds.totalBoxesWide
+    startingCropMetadata?.squaresWide || bounds.totalBoxesWide
   );
   const [cropNumberBoxesTall, setCropNumberBoxesTall] = React.useState(
-    bounds.totalBoxesTallWritable
+    startingCropMetadata?.squaresWide || bounds.totalBoxesTallWritable
   );
 
   const onDialogConfirmed = () => {
@@ -84,7 +86,7 @@ const CropModal = ({
       <CanvasWrapper
         imageToCrop={imageToCrop}
         aspectRatio={cropNumberBoxesWide / cropNumberBoxesTall}
-        startingClipPathInfo={null}
+        startingCropMetadata={startingCropMetadata}
         setPreviewImage={(image, clipPathInfo) => {
           setPreviewImage(image);
           setClipPathInfo(clipPathInfo);
@@ -158,7 +160,7 @@ const CropModal = ({
 type WrapperProps = {
   imageToCrop: FabricImage | null;
   aspectRatio: number;
-  startingClipPathInfo: ClipPathInfo | null;
+  startingCropMetadata: CroppedPhotoMetadata | null;
   setPreviewImage: (
     image: HTMLImageElement,
     clipPathInfo: ClipPathInfo
@@ -168,7 +170,7 @@ type WrapperProps = {
 function CanvasWrapper({
   imageToCrop,
   aspectRatio,
-  startingClipPathInfo,
+  startingCropMetadata,
   setPreviewImage,
 }: React.PropsWithRef<WrapperProps>) {
   const htmlCanvas = React.useRef<HTMLCanvasElement>(null);
@@ -178,7 +180,7 @@ function CanvasWrapper({
     imageToCrop,
     aspectRatio,
     setPreviewImage,
-    startingClipPathInfo
+    startingCropMetadata
   );
   React.useEffect(() => {
     if (!htmlCanvas.current) {

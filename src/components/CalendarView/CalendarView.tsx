@@ -9,21 +9,25 @@ import { getYearMonthString } from "@/helpers/calendar-helpers";
 import { getDaysInMonth, setDay } from "date-fns";
 import CropModal from "../CropModal";
 import {
+  getFabricImageFromElement,
   getFabricImageFromFile,
   getFileFromFilePicker as getFileFromFilePicker,
   PhotoSelectionType,
 } from "@/helpers/file-input";
-import { FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
+import { ClipPathInfo, CroppedPhotoMetadata, FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
 import { FabricImage } from "fabric";
 
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
-  const { yearMonthInfo, calendarFunctions } =
+  const { yearMonthInfo, calendarFunctions, croppedDateImages } =
     React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
   const [isCropDialogOpen, setIsCropDialogOpen] = React.useState(false);
+  const [startingCropMetadata, setStartingCropMetadata] = React.useState<CroppedPhotoMetadata | null>(
+    null
+  );
   const [imageToCrop, setImageToCrop] = React.useState<FabricImage | null>(
     null
   );
@@ -59,15 +63,25 @@ function CalendarView() {
     daysInMonth.push(i);
   }
 
-  const getFileForDay = async (dayInMonth: number) => {
+  const getFileForDay = async (dayInMonth: ValidDate) => {
     setIsCropDialogOpen(true);
-    const files = await getFileFromFilePicker(PhotoSelectionType.Single);
-    if (!files || files.length === 0) {
-      return;
+
+    const croppedImage = croppedDateImages.get(dayInMonth);
+    const fullInfo = loadedImagesCache.get(dayInMonth);
+
+    if (fullInfo) {
+      const fabricImage = await getFabricImageFromElement(fullInfo.fullImage);
+      setImageToCrop(fabricImage);
+      setStartingCropMetadata(fullInfo.metadata);
+    } else {
+      const files = await getFileFromFilePicker(PhotoSelectionType.Single);
+      if (!files || files.length === 0) {
+        return;
+      }
+      const file = files[0];
+      const fabricImage = await getFabricImageFromFile(file);
+      setImageToCrop(fabricImage);
     }
-    const file = files[0];
-    const fabricImage = await getFabricImageFromFile(file);
-    setImageToCrop(fabricImage);
     setSelectedDayNumber(dayInMonth);
   };
 
@@ -77,6 +91,7 @@ function CalendarView() {
         isOpen={isCropDialogOpen}
         dateNumber={selectedDayNumber}
         yearMonthInfo={yearMonthInfo}
+        startingCropMetadata={startingCropMetadata}
         onConfirm={(croppedImage, croppedPhotoMetadata) => {
           if (!selectedDayNumber || !imageToCrop) {
             return;
@@ -120,7 +135,7 @@ function CalendarView() {
                 yearMonthInfo={yearMonthInfo}
                 fullCroppedPhotoInfo={loaded ? { ...loaded } : null}
                 onClick={() => {
-                  getFileForDay(today);
+                  getFileForDay(today as ValidDate);
                 }}
               ></HobonichiCousinClickableDate>
             );

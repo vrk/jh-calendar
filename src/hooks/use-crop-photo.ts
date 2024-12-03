@@ -8,7 +8,7 @@ import {
   TPointerEventInfo,
   util,
 } from "fabric";
-import { ClipPathInfo, RawImageData } from "@/helpers/calendar-data-types";
+import { ClipPathInfo, CroppedPhotoMetadata, RawImageData } from "@/helpers/calendar-data-types";
 import { createImageElementWithSrc } from "@/helpers/file-input";
 
 function useCropPhoto(
@@ -16,7 +16,7 @@ function useCropPhoto(
   fabricImage: FabricImage | null,
   aspectRatio: number,
   setCroppedImage: (img: HTMLImageElement, clipaPathInfo: ClipPathInfo) => void,
-  startingClipPathInfo: ClipPathInfo | null
+  startingCropMetadata: CroppedPhotoMetadata | null
 ) {
   const rectangle = new Rect({
     fill: "transparent",
@@ -31,10 +31,10 @@ function useCropPhoto(
     lockSkewingY: true,
     transparentCorners: false,
     visible: true,
-    height: startingClipPathInfo?.height,
-    width: startingClipPathInfo?.width,
-    top: startingClipPathInfo?.top,
-    left: startingClipPathInfo?.left,
+    height: startingCropMetadata?.clipPathInfo?.height,
+    width: startingCropMetadata?.clipPathInfo?.width,
+    top: startingCropMetadata?.clipPathInfo?.top,
+    left: startingCropMetadata?.clipPathInfo?.left,
   });
   rectangle.controls.mt.setVisibility(false, "", rectangle);
   rectangle.controls.ml.setVisibility(false, "", rectangle);
@@ -49,15 +49,15 @@ function useCropPhoto(
     fabricImage.scale(scale);
     fabricCanvas.add(fabricImage);
     fabricCanvas.centerObject(fabricImage);
-
-    const cropRectStartingWidth = fabricImage.getScaledWidth();
-    const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
-    rectangle.width = cropRectStartingWidth;
-    rectangle.height = cropRectStartingHeight;
-    clampSizeToBounds(fabricImage, rectangle);
-
     fabricCanvas.add(rectangle);
-    fabricCanvas.centerObject(rectangle);
+    if (!startingCropMetadata?.clipPathInfo) {
+      const cropRectStartingWidth = fabricImage.getScaledWidth();
+      const cropRectStartingHeight = (1 / aspectRatio) * cropRectStartingWidth;
+      rectangle.width = cropRectStartingWidth;
+      rectangle.height = cropRectStartingHeight;
+      fabricCanvas.centerObject(rectangle);
+    }
+    clampSizeToBounds(fabricImage, rectangle);
     fabricCanvas.setActiveObject(rectangle);
     fabricCanvas.requestRenderAll();
 

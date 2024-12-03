@@ -14,8 +14,6 @@
   right: 0;
 }
 
-.photoPreviewContainer.boundingSquare {
-}
-
-.photoPreviewContainer.boundingWritable {
+.photoPreviewContainer.clickable {
+  cursor: pointer;
 }

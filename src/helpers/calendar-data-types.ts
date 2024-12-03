@@ -20,19 +20,27 @@ export type RawImageData = {
 
 export type BoundingBoxValue = "square" | "writable-space";
 
-export type FullCroppedPhotoInfo = {
+export type FullPhotoInfo = {
   fullImage: HTMLImageElement;
-  croppedImage: HTMLImageElement;
-  metadata: CroppedPhotoMetadata;
 };
 
+export type CroppedPhotoInfo = {
+  croppedImage: HTMLImageElement;
+  metadata: CroppedPhotoMetadata;
+}
+
 export type FullCroppedPhotoRawData = {
+  id: ValidDate;
   fullImageData: RawImageData;
+};
+
+export type CroppedImageRawData = {
+  id: ValidDate;
   croppedImageData: RawImageData;
   metadata: CroppedPhotoMetadata;
 };
 
-function elementToData(img: HTMLImageElement) {
+export function elementToData(img: HTMLImageElement) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) {
@@ -42,41 +50,6 @@ function elementToData(img: HTMLImageElement) {
   canvas.height = img.naturalHeight;
   context.drawImage(img, 0, 0);
   return canvas.toDataURL();
-}
-
-export function croppedPhotoToRawData(
-  photoInfo: FullCroppedPhotoInfo
-): FullCroppedPhotoRawData {
-  const converted: FullCroppedPhotoRawData = {
-    fullImageData: {
-      data: elementToData(photoInfo.fullImage),
-      height: photoInfo.fullImage.height,
-      width: photoInfo.fullImage.width,
-    },
-    croppedImageData: {
-      data: elementToData(photoInfo.croppedImage),
-      height: photoInfo.croppedImage.height,
-      width: photoInfo.croppedImage.width,
-    },
-    metadata: { ...photoInfo.metadata },
-  };
-  return converted;
-}
-
-export function rawDataToCroppedPhoto(
-  rawData: FullCroppedPhotoRawData
-) {
-  const fullImage = new Image();
-  fullImage.src = rawData.fullImageData.data;
-  const croppedImage = new Image();
-  croppedImage.src = rawData.croppedImageData.data;
-  
-  const converted: FullCroppedPhotoInfo = {
-    fullImage,
-    croppedImage,
-    metadata: { ...rawData.metadata },
-  };
-  return converted;
 }
 
 export type CroppedPhotoMetadata = {

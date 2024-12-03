@@ -1,10 +1,12 @@
 "use client";
 import {
-  croppedPhotoToRawData,
-  FullCroppedPhotoInfo,
+  elementToData,
+  FullPhotoInfo,
   FullCroppedPhotoRawData,
-  rawDataToCroppedPhoto,
   YearMonthInfo,
+  ValidDate,
+  CroppedImageRawData,
+  CroppedPhotoMetadata,
 } from "./calendar-data-types";
 import { getYearMonthInfo } from "./calendar-helpers";
 
@@ -13,7 +15,8 @@ import { getYearMonthInfo } from "./calendar-helpers";
 //
 const DATABASE_NAME = "December2024CalendarHelperDb";
 
-const CALENDAR_IMAGE_STORE_NAME = "FullImages";
+const CROPPED_IMAGE_STORE_NAME = "CroppedImageStore";
+const FULL_IMAGE_STORE_NAME = "FullImageStore";
 
 //
 // Other constants
@@ -50,7 +53,8 @@ export async function getDatabase(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
 
-      db.createObjectStore(CALENDAR_IMAGE_STORE_NAME, { keyPath: "id" });
+      db.createObjectStore(CROPPED_IMAGE_STORE_NAME, { keyPath: "id" });
+      db.createObjectStore(FULL_IMAGE_STORE_NAME, { keyPath: "id" });
     };
 
     request.onsuccess = () => {
@@ -60,21 +64,29 @@ export async function getDatabase(): Promise<IDBDatabase> {
   });
 }
 
-export async function saveImageDataForDateDb(
-  dayOfMonth: number,
-  imageData: FullCroppedPhotoInfo
+export async function saveCroppedImageDataForDateDb(
+  dayOfMonth: ValidDate,
+  croppedImage: HTMLImageElement,
+  metadata: CroppedPhotoMetadata
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const db = await getDatabase();
-    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME, "readwrite");
-    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
+    const transaction = db.transaction(CROPPED_IMAGE_STORE_NAME, "readwrite");
+    const objectStore = transaction.objectStore(CROPPED_IMAGE_STORE_NAME);
 
-    const rawImageData = croppedPhotoToRawData(imageData);
-
-    const request = objectStore.put({
+    const data = elementToData(croppedImage);
+    const height = croppedImage.naturalHeight;
+    const width = croppedImage.naturalWidth;
+    const newItem: CroppedImageRawData = {
       id: dayOfMonth,
-      rawImageData,
-    });
+      croppedImageData: {
+        data,
+        height,
+        width,
+      },
+      metadata: {...metadata}
+    }
+    const request = objectStore.put(newItem);
     request.onerror = (error) => {
       console.log(error);
       reject(`Could not create object with id: ${dayOfMonth}`);
@@ -85,56 +97,61 @@ export async function saveImageDataForDateDb(
   });
 }
 
-export async function loadAllImageDataFromDb(
-  onImageLoaded: (dayOfMonth: number, image: FullCroppedPhotoInfo) => void,
+export async function saveFullImageDataForDateDb(
+  dayOfMonth: ValidDate,
+  imageData: FullPhotoInfo
+): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const db = await getDatabase();
+    const transaction = db.transaction(FULL_IMAGE_STORE_NAME, "readwrite");
+    const objectStore = transaction.objectStore(FULL_IMAGE_STORE_NAME);
+
+    const data = elementToData(imageData.fullImage);
+    const height = imageData.fullImage.naturalHeight;
+    const width = imageData.fullImage.naturalWidth;
+    const newItem: FullCroppedPhotoRawData = {
+      id: dayOfMonth,
+      fullImageData: {
+        data,
+        height,
+        width,
+      },
+    }
+    const request = objectStore.put(newItem);
+    request.onerror = (error) => {
+      console.log(error);
+      reject(`Could not create object with id: ${dayOfMonth}`);
+    };
+    request.onsuccess = () => {
+      resolve();
+    };
+  });
+}
+
+export async function loadAllCroppedDataFromDb(
+  onImageLoaded: (dayOfMonth: number, image: HTMLImageElement, metadata: CroppedPhotoMetadata) => void,
   onFinished: () => void
 ) {
   return new Promise(async (resolve, reject) => {
     const db = await getDatabase();
-    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME);
-    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
+    const transaction = db.transaction(CROPPED_IMAGE_STORE_NAME);
+    const objectStore = transaction.objectStore(CROPPED_IMAGE_STORE_NAME);
     const request = objectStore.openCursor();
     request.onsuccess = async () => {
       const cursor = request.result;
       if (cursor) {
-        const rawImageData: FullCroppedPhotoRawData = cursor.value.rawImageData;
+        const rawImageData = cursor.value as CroppedImageRawData;
         console.log(cursor.value.id);
-        const image = rawDataToCroppedPhoto(rawImageData);
-        onImageLoaded(cursor.value.id, image);
+        const image = new Image();
+        image.src = rawImageData.croppedImageData.data;
+        onImageLoaded(cursor.value.id, image, rawImageData.metadata);
         cursor.continue();
       } else {
         onFinished();
       }
     };
     request.onerror = () => {
-      reject("Could not get all journals");
+      reject("Could not get all data");
     };
   });
-}
-
-export async function loadAllImageDataFromDb2(
-  onImageLoaded: (dayOfMonth: number, image: FullCroppedPhotoInfo) => void,
-  onFinished: () => void
-) {
-  let count = 0;
-  const executor = async (resolve: any, reject: any) => {
-    const db = await getDatabase();
-    const transaction = db.transaction(CALENDAR_IMAGE_STORE_NAME);
-    const objectStore = transaction.objectStore(CALENDAR_IMAGE_STORE_NAME);
-    const request = objectStore.getAll();
-    request.onsuccess = () => {
-      for (const result of request.result) {
-        console.log('hello', count++);
-        const rawImageData: FullCroppedPhotoRawData = result.rawImageData;
-        const image = rawDataToCroppedPhoto(rawImageData);
-        onImageLoaded(result.id, image);
-      }
-      onFinished();
-    };
-    request.onerror = () => {
-      reject("Could not get all journals");
-    };
-    resolve(transaction);
-  };
-  return new Promise(executor);
 }

@@ -14,13 +14,13 @@ import {
   getFileFromFilePicker as getFileFromFilePicker,
   PhotoSelectionType,
 } from "@/helpers/file-input";
-import { ClipPathInfo, CroppedPhotoMetadata, FullCroppedPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
+import { ClipPathInfo, CroppedPhotoMetadata, FullPhotoInfo, ValidDate } from "@/helpers/calendar-data-types";
 import { FabricImage } from "fabric";
 
 const STATIC_CONTENT_ID = "static-conten";
 
 function CalendarView() {
-  const { yearMonthInfo, calendarFunctions, imagesByDateMap } =
+  const { yearMonthInfo, calendarFunctions, croppedImagesByDateMap } =
     React.useContext(CalendarContext);
   const svgRoot = React.useRef<SVGSVGElement>(null);
   const totalRoot = React.useRef<HTMLDivElement>(null);
@@ -62,13 +62,13 @@ function CalendarView() {
   const getFileForDay = async (dayInMonth: ValidDate) => {
     setIsCropDialogOpen(true);
 
-    const fullInfo = imagesByDateMap.get(dayInMonth);
+    // const fullInfo = imagesByDateMap.get(dayInMonth);
 
-    if (fullInfo) {
-      const fabricImage = await getFabricImageFromElement(fullInfo.fullImage);
-      setImageToCrop(fabricImage);
-      setStartingCropMetadata(fullInfo.metadata);
-    } else {
+    // if (fullInfo) {
+    //   const fabricImage = await getFabricImageFromElement(fullInfo.fullImage);
+    //   setImageToCrop(fabricImage);
+    //   setStartingCropMetadata(fullInfo.metadata);
+    // } else {
       const files = await getFileFromFilePicker(PhotoSelectionType.Single);
       if (!files || files.length === 0) {
         return;
@@ -76,7 +76,7 @@ function CalendarView() {
       const file = files[0];
       const fabricImage = await getFabricImageFromFile(file);
       setImageToCrop(fabricImage);
-    }
+    // }
     setSelectedDayNumber(dayInMonth);
   };
 
@@ -91,14 +91,10 @@ function CalendarView() {
           if (!selectedDayNumber || !imageToCrop) {
             return;
           }
-          const fullCroppedPhotoInfo: FullCroppedPhotoInfo = {
-            fullImage: imageToCrop._element as HTMLImageElement,
-            croppedImage: croppedImage,
-            metadata: croppedPhotoMetadata,
-          };
           calendarFunctions.setPhotoForDate(
             selectedDayNumber as ValidDate,
-            fullCroppedPhotoInfo
+            croppedImage,
+            croppedPhotoMetadata
           );
         }}
         onOpenChange={(isOpen) => {
@@ -114,13 +110,14 @@ function CalendarView() {
       <div className={style.svgContainer}>
         <svg ref={svgRoot}>
           {daysInMonth.map((today) => {
-            const loaded = imagesByDateMap.get(today);
+            const loaded = croppedImagesByDateMap.get(today);
             return (
               <HobonichiCousinClickableDate
                 key={today}
                 dayInMonth={today}
                 yearMonthInfo={yearMonthInfo}
-                fullCroppedPhotoInfo={loaded ? { ...loaded } : null}
+                croppedImage={loaded?.croppedImage}
+                metadata={loaded?.metadata}
                 onClick={() => {
                   getFileForDay(today as ValidDate);
                 }}

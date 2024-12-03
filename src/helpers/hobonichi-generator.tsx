@@ -2,12 +2,14 @@ import * as React from "react";
 import { add, format } from "date-fns";
 import {
   BoundingBoxValue,
-  FullCroppedPhotoInfo,
+  CroppedPhotoMetadata,
+  FullPhotoInfo,
   YearMonthInfo,
 } from "@/helpers/calendar-data-types";
 import { getWeekNumber, getYearMonthInfo } from "@/helpers/calendar-helpers";
 import DayAddPhotoButton from "@/components/DayAddPhotoButton";
 import style from "./hobonichi-generator.module.css";
+import { metadata } from "@/app/layout";
 
 const PPI = 96;
 const GRID_BOX_WIDTH_IN_INCHES = 0.145669; // 3.7 mm in inches
@@ -645,14 +647,16 @@ function getDateInfo(
 type ClickableDateProps = {
   dayInMonth: number;
   yearMonthInfo: YearMonthInfo;
-  fullCroppedPhotoInfo: FullCroppedPhotoInfo | null;
+  croppedImage: HTMLImageElement | undefined;
+  metadata: CroppedPhotoMetadata | undefined;
   onClick: () => void;
 };
 
 export function HobonichiCousinClickableDate({
   dayInMonth,
   yearMonthInfo,
-  fullCroppedPhotoInfo,
+  croppedImage,
+  metadata,
   onClick,
 }: ClickableDateProps) {
   const itemWidth = 80;
@@ -695,7 +699,7 @@ export function HobonichiCousinClickableDate({
     NUMBER_PIXELS_PER_MARGIN * 2 +
     heightDelta / 2;
 
-  if (!fullCroppedPhotoInfo) {
+  if (!croppedImage || !metadata) {
     return (
       <DayAddPhotoButton
         x={x}
@@ -719,10 +723,10 @@ export function HobonichiCousinClickableDate({
         <DateSquarePreview
           dateNumber={dayInMonth}
           yearMonthInfo={yearMonthInfo}
-          previewImage={fullCroppedPhotoInfo.croppedImage}
-          boundingBox={fullCroppedPhotoInfo.metadata.boundingBox}
-          cropNumberBoxesWide={fullCroppedPhotoInfo.metadata.squaresWide}
-          cropNumberBoxesTall={fullCroppedPhotoInfo.metadata.squaresTall}
+          previewImage={croppedImage}
+          boundingBox={metadata.boundingBox}
+          cropNumberBoxesWide={metadata.squaresWide}
+          cropNumberBoxesTall={metadata.squaresTall}
           uniqueid="calendar-preview"
           onClick={onClick}
         ></DateSquarePreview>
